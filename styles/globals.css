@@ -1,10 +1,9 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@400;500;600;700&display=swap");
-
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap");
 @import "tailwindcss";
 
 :root {
-  --background: #faf8f5;
-  --foreground: #2a2525;
+  --background: #ffffff;
+  --foreground: #111827;
 }
 
 body {
@@ -18,23 +17,32 @@ html {
 }
 
 ::selection {
-  background-color: #ffe8e8;
-  color: #2a2525;
+  background-color: #dcfce7;
+  color: #111827;
 }
 
+/* Minimal scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f5f0e8;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d4c4b0;
-  border-radius: 4px;
+  background: #e5e7eb;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #bfa68a;
+  background: #d1d5db;
+}
+
+/* Smooth transitions globally */
+* {
+  transition-property: background-color, border-color, color, fill, stroke,
+    opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
 }

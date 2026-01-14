@@ -8,41 +8,56 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Soft warm palette
-        cream: {
-          50: "#FFFEF9",
-          100: "#FFF9F0",
-          200: "#FFF3E0",
-          300: "#FFE8CC",
-          400: "#FFD9B3",
+        // Clean white base
+        base: {
+          50: "#FFFFFF",
+          100: "#FAFBFC",
+          200: "#F4F6F8",
+          300: "#E9ECEF",
+          400: "#DEE2E6",
         },
-        rose: {
-          50: "#FFF5F5",
-          100: "#FFE8E8",
-          200: "#FFCCD2",
-          300: "#FFB3BD",
-          400: "#FF99A8",
-          500: "#E88A96",
-          600: "#D4707E",
+        // Soft sage green
+        sage: {
+          50: "#F0FDF4",
+          100: "#DCFCE7",
+          200: "#BBF7D0",
+          300: "#86EFAC",
+          400: "#4ADE80",
+          500: "#22C55E",
+          600: "#16A34A",
         },
-        warm: {
-          50: "#FAF8F5",
-          100: "#F5F0E8",
-          200: "#E8DFD3",
-          300: "#D4C4B0",
-          400: "#BFA68A",
-          500: "#A68A6D",
-          600: "#8A7058",
+        // Soft sky blue
+        sky: {
+          50: "#F0F9FF",
+          100: "#E0F2FE",
+          200: "#BAE6FD",
+          300: "#7DD3FC",
+          400: "#38BDF8",
+          500: "#0EA5E9",
+          600: "#0284C7",
         },
-        charcoal: {
-          700: "#4A4545",
-          800: "#3A3535",
-          900: "#2A2525",
+        // Neutral text colors
+        neutral: {
+          400: "#9CA3AF",
+          500: "#6B7280",
+          600: "#4B5563",
+          700: "#374151",
+          800: "#1F2937",
+          900: "#111827",
         },
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
-        serif: ["var(--font-playfair)", "Georgia", "serif"],
+        sans: ["Inter", "system-ui", "sans-serif"],
+        display: ["DM Sans", "Inter", "system-ui", "sans-serif"],
+      },
+      boxShadow: {
+        soft: "0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)",
+        card: "0 0 0 1px rgba(0, 0, 0, 0.03), 0 2px 4px rgba(0, 0, 0, 0.05)",
+        hover: "0 0 0 1px rgba(0, 0, 0, 0.03), 0 8px 16px rgba(0, 0, 0, 0.08)",
+      },
+      borderRadius: {
+        "2xl": "1rem",
+        "3xl": "1.5rem",
       },
     },
   },

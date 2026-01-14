@@ -33,7 +33,7 @@ export default function CompanionPage() {
       id: "welcome",
       role: "assistant",
       content:
-        "Hey there! 🎹 I'm your Piano Buddy. Whether you need practice tips, warm-up routines, or just some motivation—I'm here to help. What's on your mind?",
+        "Hey there! 🎹 I'm your Piano Buddy. Whether you need practice tips, warm-up routines, or just some motivation — I'm here to help. What's on your mind?",
     },
   ]);
   const [input, setInput] = useState("");
@@ -112,20 +112,36 @@ export default function CompanionPage() {
         <title>Piano Buddy | Piano Companion</title>
       </Head>
 
-      <main className="min-h-screen bg-warm-50 flex flex-col">
+      <main className="min-h-screen bg-base-100 flex flex-col">
         {/* Header */}
-        <header className="border-b border-warm-200 bg-white/50 backdrop-blur-sm sticky top-0 z-10">
+        <header className="border-b border-base-200 bg-white/80 backdrop-blur-md sticky top-0 z-10">
           <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
             <Link
               href="/"
-              className="text-warm-500 hover:text-rose-600 transition-colors"
+              className="flex items-center gap-2 text-neutral-500 hover:text-neutral-800 transition-colors"
             >
-              ← Back
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
+                />
+              </svg>
+              <span className="text-sm font-medium">Back</span>
             </Link>
-            <h1 className="font-serif text-xl text-charcoal-900">
-              Piano Buddy
-            </h1>
-            <div className="w-16" /> {/* Spacer for centering */}
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-sage-400" />
+              <h1 className="font-display font-semibold text-neutral-800">
+                Piano Buddy
+              </h1>
+            </div>
+            <div className="w-16" />
           </div>
         </header>
 
@@ -142,11 +158,11 @@ export default function CompanionPage() {
                 <div
                   className={`max-w-[80%] px-4 py-3 rounded-2xl ${
                     message.role === "user"
-                      ? "bg-rose-500 text-white rounded-br-md"
-                      : "bg-white border border-warm-200 text-charcoal-800 rounded-bl-md"
+                      ? "bg-neutral-800 text-white rounded-br-md"
+                      : "bg-base-200 text-neutral-700 rounded-bl-md"
                   }`}
                 >
-                  <p className="whitespace-pre-wrap leading-relaxed">
+                  <p className="whitespace-pre-wrap leading-relaxed text-[15px]">
                     {message.content}
                   </p>
                 </div>
@@ -155,17 +171,11 @@ export default function CompanionPage() {
 
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-white border border-warm-200 px-4 py-3 rounded-2xl rounded-bl-md">
-                  <div className="flex space-x-2">
-                    <span className="w-2 h-2 bg-warm-400 rounded-full animate-bounce" />
-                    <span
-                      className="w-2 h-2 bg-warm-400 rounded-full animate-bounce"
-                      style={{ animationDelay: "0.1s" }}
-                    />
-                    <span
-                      className="w-2 h-2 bg-warm-400 rounded-full animate-bounce"
-                      style={{ animationDelay: "0.2s" }}
-                    />
+                <div className="bg-base-200 px-4 py-3 rounded-2xl rounded-bl-md">
+                  <div className="flex space-x-1.5">
+                    <span className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" />
+                    <span className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce [animation-delay:0.1s]" />
+                    <span className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce [animation-delay:0.2s]" />
                   </div>
                 </div>
               </div>
@@ -176,7 +186,7 @@ export default function CompanionPage() {
         </div>
 
         {/* Input Area */}
-        <div className="border-t border-warm-200 bg-white/80 backdrop-blur-sm">
+        <div className="border-t border-base-200 bg-white">
           <div className="max-w-3xl mx-auto px-4 py-4">
             {/* Quick Prompts */}
             <div className="flex flex-wrap gap-2 mb-3">
@@ -185,8 +195,8 @@ export default function CompanionPage() {
                   key={qp.label}
                   onClick={() => handleQuickPrompt(qp.prompt)}
                   disabled={isLoading}
-                  className="px-3 py-1.5 text-sm bg-warm-100 hover:bg-warm-200 
-                           text-charcoal-700 rounded-full transition-colors
+                  className="px-3 py-1.5 text-sm bg-base-200 hover:bg-sage-50 hover:text-sage-700
+                           text-neutral-600 rounded-full transition-colors
                            disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {qp.label}
@@ -202,19 +212,31 @@ export default function CompanionPage() {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask me anything about piano..."
                 disabled={isLoading}
-                className="flex-1 px-4 py-3 bg-warm-50 border border-warm-200 
-                         rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-300
-                         focus:border-transparent transition-all
-                         disabled:opacity-50 placeholder:text-warm-400"
+                className="flex-1 px-4 py-3 bg-base-100 border border-base-300 
+                         rounded-xl focus:outline-none focus:ring-2 focus:ring-sage-200
+                         focus:border-sage-300 transition-all
+                         disabled:opacity-50 placeholder:text-neutral-400"
               />
               <button
                 type="submit"
                 disabled={isLoading || !input.trim()}
-                className="px-6 py-3 bg-rose-500 hover:bg-rose-600 text-white 
+                className="px-5 py-3 bg-neutral-800 hover:bg-neutral-900 text-white 
                          rounded-xl font-medium transition-colors
                          disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Send
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
+                  />
+                </svg>
               </button>
             </form>
           </div>
