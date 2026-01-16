@@ -4,7 +4,7 @@ import Head from "next/head";
 const features = [
   {
     title: "Piano Buddy",
-    description: "Your AI companion for practice tips and motivation",
+    description: "Your AI companion for tips, motivation & practice guidance",
     href: "/companion",
     icon: (
       <svg
@@ -21,12 +21,12 @@ const features = [
         />
       </svg>
     ),
-    color: "bg-sage-50 text-sage-600",
-    hoverColor: "group-hover:bg-sage-100",
+    gradient: "from-mint-400/20 to-mint-500/10",
+    iconBg: "bg-mint-500/10 text-mint-600",
   },
   {
     title: "Play Piano",
-    description: "A beautiful piano you can play right in your browser",
+    description: "Beautiful virtual piano with realistic sounds & game mode",
     href: "/piano",
     icon: (
       <svg
@@ -43,12 +43,12 @@ const features = [
         />
       </svg>
     ),
-    color: "bg-sky-50 text-sky-600",
-    hoverColor: "group-hover:bg-sky-100",
+    gradient: "from-sage-300/30 to-sage-400/10",
+    iconBg: "bg-sage-500/10 text-sage-600",
   },
   {
     title: "Mood Playlist",
-    description: "Get personalized piano piece recommendations",
+    description: "AI-curated piano pieces matched to your current mood",
     href: "/playlist",
     icon: (
       <svg
@@ -65,101 +65,149 @@ const features = [
         />
       </svg>
     ),
-    color: "bg-gradient-to-br from-sage-50 to-sky-50 text-sage-600",
-    hoverColor: "group-hover:from-sage-100 group-hover:to-sky-100",
+    gradient: "from-mint-300/20 via-sage-200/20 to-ivory-200/30",
+    iconBg: "bg-gradient-to-br from-mint-500/10 to-sage-500/10 text-forest-600",
   },
 ];
+
+// Mini piano keys decoration
+function PianoDecoration() {
+  return (
+    <div className="flex items-end justify-center gap-[2px] h-8 opacity-40">
+      {[...Array(7)].map((_, i) => (
+        <div key={i} className="relative">
+          <div className="w-4 h-8 bg-stone-200 rounded-b-sm" />
+          {i !== 2 && i !== 6 && (
+            <div className="absolute -right-[5px] top-0 w-3 h-5 bg-stone-400 rounded-b-sm z-10" />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function Home() {
   return (
     <>
       <Head>
-        <title>Piano Companion</title>
-        <meta name="description" content="Your cozy corner for piano" />
+        <title>Piano Companion — Your Personal Piano Space</title>
+        <meta
+          name="description"
+          content="Practice, play, and discover piano pieces in one beautiful place"
+        />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="min-h-screen bg-white">
-        {/* Hero Section */}
-        <section className="relative overflow-hidden">
-          {/* Subtle gradient background */}
-          <div className="absolute inset-0 bg-linear-to-br from-sage-50/50 via-white to-sky-50/50" />
+      <main className="min-h-screen relative overflow-hidden">
+        {/* Background decorations */}
+        <div className="fixed inset-0 pointer-events-none">
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-mint-200/30 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
+          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-sage-200/40 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/3" />
+          <div className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-ivory-200/50 rounded-full blur-[80px] -translate-x-1/2 -translate-y-1/2" />
+        </div>
 
-          {/* Decorative elements */}
-          <div className="absolute top-20 left-10 w-72 h-72 bg-sage-100/40 rounded-full blur-3xl" />
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-sky-100/40 rounded-full blur-3xl" />
+        {/* Content */}
+        <div className="relative z-10">
+          {/* Hero */}
+          <section className="max-w-5xl mx-auto px-6 pt-16 pb-12 md:pt-24 md:pb-16">
+            <div className="text-center animate-fade-in">
+              {/* Piano decoration */}
+              <div className="mb-6">
+                <PianoDecoration />
+              </div>
 
-          <div className="relative max-w-4xl mx-auto px-6 pt-24 pb-20">
-            <div className="text-center">
-              {/* Small badge */}
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-base-200 text-neutral-600 text-sm mb-6">
-                <span className="w-1.5 h-1.5 rounded-full bg-sage-400" />
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-stone-200 text-sm text-stone-600 mb-6 shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-mint-500 animate-pulse-soft" />
                 Your personal piano space
               </div>
 
-              <h1 className="font-display text-5xl md:text-6xl font-semibold text-neutral-900 tracking-tight mb-4">
-                Piano Companion
+              {/* Title */}
+              <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-semibold text-stone-800 tracking-tight mb-4">
+                Piano
+                <span className="text-gradient"> Companion</span>
               </h1>
-              <p className="text-lg text-neutral-500 max-w-md mx-auto leading-relaxed">
-                Practice, play, and discover new pieces — all in one beautiful
-                place.
+
+              {/* Subtitle */}
+              <p className="text-lg md:text-xl text-stone-500 max-w-lg mx-auto leading-relaxed">
+                Practice, play, and discover beautiful piano pieces — all in one
+                elegant place.
               </p>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* Feature Cards */}
-        <section className="max-w-4xl mx-auto px-6 pb-24">
-          <div className="grid md:grid-cols-3 gap-4">
-            {features.map((feature) => (
-              <Link
-                key={feature.title}
-                href={feature.href}
-                className="group block"
-              >
-                <div className="h-full p-6 rounded-2xl bg-white border border-base-300 shadow-card hover:shadow-hover hover:-translate-y-1 transition-all duration-300">
-                  {/* Icon */}
+          {/* Features */}
+          <section className="max-w-5xl mx-auto px-6 pb-20">
+            <div className="grid md:grid-cols-3 gap-5">
+              {features.map((feature, i) => (
+                <Link
+                  key={feature.title}
+                  href={feature.href}
+                  className="group animate-slide-up cursor-pointer"
+                  style={{ animationDelay: `${i * 100}ms` }}
+                >
                   <div
-                    className={`w-12 h-12 rounded-xl ${feature.color} ${feature.hoverColor} flex items-center justify-center mb-4 transition-colors`}
+                    className={`
+                    relative h-full p-6 rounded-3xl
+                    bg-white
+                    border border-stone-200
+                    shadow-card hover:shadow-card-hover
+                    transition-all duration-300
+                    hover:-translate-y-1
+                  `}
                   >
-                    {feature.icon}
-                  </div>
-
-                  {/* Content */}
-                  <h2 className="font-display text-lg font-semibold text-neutral-800 mb-1">
-                    {feature.title}
-                  </h2>
-                  <p className="text-sm text-neutral-500 leading-relaxed">
-                    {feature.description}
-                  </p>
-
-                  {/* Arrow */}
-                  <div className="mt-4 flex items-center text-sm font-medium text-neutral-400 group-hover:text-sage-600 transition-colors">
-                    <span>Get started</span>
-                    <svg
-                      className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
+                    {/* Icon */}
+                    <div
+                      className={`
+                      w-12 h-12 rounded-2xl ${feature.iconBg}
+                      flex items-center justify-center mb-4
+                      group-hover:scale-110 transition-transform duration-300
+                    `}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
+                      {feature.icon}
+                    </div>
 
-        {/* Footer */}
-        <footer className="text-center py-8 border-t border-base-200">
-          <p className="text-sm text-neutral-400">Happy Pianing</p>
-        </footer>
+                    {/* Content */}
+                    <h2 className="font-display text-xl font-semibold text-stone-800 mb-2">
+                      {feature.title}
+                    </h2>
+                    <p className="text-stone-500 text-sm leading-relaxed mb-4">
+                      {feature.description}
+                    </p>
+
+                    {/* CTA */}
+                    <div className="flex items-center gap-1 text-sm font-medium text-mint-600 group-hover:text-mint-500">
+                      <span>Explore</span>
+                      <svg
+                        className="w-4 h-4 group-hover:translate-x-1 transition-transform"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </div>
+
+                    {/* Hover glow */}
+                    <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-mint-100/0 to-mint-100/0 group-hover:from-mint-50 group-hover:to-transparent transition-all duration-300 -z-10" />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          {/* Footer */}
+          <footer className="text-center py-8 border-t border-sage-100/50">
+            <p className="text-sm text-stone-400">
+              Happy Pianing <span className="text-mint-500">♥</span>
+            </p>
+          </footer>
+        </div>
       </main>
     </>
   );

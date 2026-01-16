@@ -3,23 +3,63 @@ import Head from "next/head";
 import { useState } from "react";
 
 const MOODS = [
-  { id: "happy", label: "Happy", emoji: "😊" },
-  { id: "sad", label: "Sad", emoji: "😢" },
-  { id: "relaxed", label: "Relaxed", emoji: "😌" },
-  { id: "energetic", label: "Energetic", emoji: "⚡" },
-  { id: "romantic", label: "Romantic", emoji: "💕" },
-  { id: "melancholy", label: "Melancholy", emoji: "🌧️" },
-  { id: "focused", label: "Focused", emoji: "🎯" },
-  { id: "dreamy", label: "Dreamy", emoji: "✨" },
+  {
+    id: "happy",
+    label: "Happy",
+    emoji: "☀️",
+    bg: "from-amber-100/50 to-orange-50/30",
+  },
+  {
+    id: "sad",
+    label: "Sad",
+    emoji: "🌧️",
+    bg: "from-blue-100/50 to-slate-50/30",
+  },
+  {
+    id: "relaxed",
+    label: "Relaxed",
+    emoji: "🍃",
+    bg: "from-mint-100/50 to-sage-50/30",
+  },
+  {
+    id: "energetic",
+    label: "Energetic",
+    emoji: "⚡",
+    bg: "from-yellow-100/50 to-amber-50/30",
+  },
+  {
+    id: "romantic",
+    label: "Romantic",
+    emoji: "🌸",
+    bg: "from-pink-100/50 to-rose-50/30",
+  },
+  {
+    id: "melancholy",
+    label: "Melancholy",
+    emoji: "🌙",
+    bg: "from-indigo-100/50 to-purple-50/30",
+  },
+  {
+    id: "focused",
+    label: "Focused",
+    emoji: "🎯",
+    bg: "from-cyan-100/50 to-sky-50/30",
+  },
+  {
+    id: "dreamy",
+    label: "Dreamy",
+    emoji: "✨",
+    bg: "from-violet-100/50 to-fuchsia-50/30",
+  },
 ];
 
 const SITUATIONS = [
-  { id: "studying", label: "Studying" },
-  { id: "sleeping", label: "Falling asleep" },
-  { id: "morning", label: "Morning coffee" },
-  { id: "rainy", label: "Rainy day" },
-  { id: "working", label: "Working" },
-  { id: "unwinding", label: "Unwinding" },
+  { id: "studying", label: "📚 Studying" },
+  { id: "sleeping", label: "😴 Falling asleep" },
+  { id: "morning", label: "☕ Morning coffee" },
+  { id: "rainy", label: "🌧️ Rainy day" },
+  { id: "working", label: "💼 Working" },
+  { id: "unwinding", label: "🛋️ Unwinding" },
 ];
 
 interface PieceRecommendation {
@@ -32,7 +72,6 @@ interface PieceRecommendation {
 
 interface PlaylistResult {
   mood: string;
-  situation?: string;
   intro: string;
   pieces: PieceRecommendation[];
 }
@@ -63,7 +102,6 @@ export default function PlaylistPage() {
       });
 
       if (!response.ok) throw new Error("Failed to generate playlist");
-
       const data = await response.json();
       setResult(data);
     } catch (err) {
@@ -86,16 +124,16 @@ export default function PlaylistPage() {
   return (
     <>
       <Head>
-        <title>Mood Playlist | Piano Companion</title>
+        <title>Mood Playlist — Piano Companion</title>
       </Head>
 
-      <main className="min-h-screen bg-base-100">
+      <main className="min-h-screen bg-gradient-to-b from-stone-100 via-sage-50 to-stone-100">
         {/* Header */}
-        <header className="border-b border-base-200 bg-white/80 backdrop-blur-md sticky top-0 z-10">
-          <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
+        <header className="glass border-b border-sage-100/50 sticky top-0 z-10">
+          <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
             <Link
               href="/"
-              className="flex items-center gap-2 text-neutral-500 hover:text-neutral-800 transition-colors"
+              className="flex items-center gap-2 text-stone-400 hover:text-forest-600 transition-colors"
             >
               <svg
                 className="w-5 h-5"
@@ -112,52 +150,54 @@ export default function PlaylistPage() {
               </svg>
               <span className="text-sm font-medium">Back</span>
             </Link>
+
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-linear-to-r from-sage-400 to-sky-400" />
-              <h1 className="font-display font-semibold text-neutral-800">
+              <div className="w-2 h-2 rounded-full bg-gradient-to-r from-mint-400 to-sage-400" />
+              <h1 className="font-display font-semibold text-forest-800">
                 Mood Playlist
               </h1>
             </div>
+
             <div className="w-16" />
           </div>
         </header>
 
         <div className="max-w-2xl mx-auto px-4 py-10">
-          {/* Result View */}
           {result ? (
-            <div className="space-y-6">
+            // Results View
+            <div className="space-y-6 animate-fade-in">
               <div className="text-center">
-                <span className="text-4xl mb-3 block">
+                <span className="text-5xl mb-4 block">
                   {getMoodData(result.mood)?.emoji}
                 </span>
-                <h2 className="font-display text-2xl font-semibold text-neutral-800 mb-2">
+                <h2 className="font-display text-2xl font-semibold text-forest-800 mb-2">
                   Your {getMoodData(result.mood)?.label} Playlist
                 </h2>
-                <p className="text-neutral-500">{result.intro}</p>
+                <p className="text-stone-500">{result.intro}</p>
               </div>
 
               <div className="space-y-3">
                 {result.pieces.map((piece, index) => (
                   <div
                     key={index}
-                    className="bg-white border border-base-200 rounded-xl p-5 shadow-card hover:shadow-hover transition-shadow"
+                    className="bg-white border border-stone-200 rounded-2xl p-5 shadow-card hover:shadow-card-hover transition-all"
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div>
-                        <h3 className="font-display font-semibold text-neutral-800">
+                        <h3 className="font-display font-semibold text-forest-800">
                           {piece.title}
                         </h3>
-                        <p className="text-neutral-400 text-sm">
+                        <p className="text-stone-400 text-sm">
                           {piece.composer}
                         </p>
                       </div>
                       {piece.difficulty && (
-                        <span className="text-xs bg-base-200 text-neutral-500 px-2.5 py-1 rounded-full">
+                        <span className="text-xs bg-sage-100/50 text-sage-600 px-2.5 py-1 rounded-full">
                           {piece.difficulty}
                         </span>
                       )}
                     </div>
-                    <p className="text-neutral-600 text-sm leading-relaxed">
+                    <p className="text-stone-600 text-sm leading-relaxed mb-3">
                       {piece.why}
                     </p>
                     {piece.youtubeSearch && (
@@ -167,22 +207,16 @@ export default function PlaylistPage() {
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 mt-3 text-sm text-sky-600 hover:text-sky-700"
+                        className="inline-flex items-center gap-1.5 text-sm text-mint-600 hover:text-mint-500 transition-colors cursor-pointer"
                       >
-                        Listen on YouTube
                         <svg
                           className="w-4 h-4"
-                          fill="none"
+                          fill="currentColor"
                           viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                          />
+                          <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
                         </svg>
+                        Listen on YouTube
                       </a>
                     )}
                   </div>
@@ -193,37 +227,37 @@ export default function PlaylistPage() {
                 <button
                   onClick={generatePlaylist}
                   disabled={isLoading}
-                  className="px-5 py-2.5 bg-base-200 hover:bg-base-300 text-neutral-700 
-                           rounded-full text-sm font-medium transition-colors disabled:opacity-50"
+                  className="px-5 py-2.5 bg-white hover:bg-stone-50 border border-stone-200 text-stone-700 
+                           rounded-full text-sm font-medium transition-all disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                 >
-                  {isLoading ? "Generating..." : "Regenerate"}
+                  {isLoading ? "Generating..." : "🔄 Regenerate"}
                 </button>
                 <button
                   onClick={reset}
-                  className="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-900 text-white 
-                           rounded-full text-sm font-medium transition-colors"
+                  className="px-5 py-2.5 bg-stone-800 hover:bg-stone-900 text-white 
+                           rounded-full text-sm font-medium transition-all shadow-soft cursor-pointer"
                 >
-                  Start Over
+                  New Playlist
                 </button>
               </div>
             </div>
           ) : (
-            /* Selection View */
-            <div className="space-y-8">
+            // Selection View
+            <div className="space-y-8 animate-fade-in">
               <div className="text-center">
-                <h2 className="font-display text-2xl font-semibold text-neutral-800 mb-2">
+                <h2 className="font-display text-2xl font-semibold text-forest-800 mb-2">
                   How are you feeling?
                 </h2>
-                <p className="text-neutral-500">
-                  Pick a mood and we&apos;ll suggest perfect piano pieces for
-                  you.
+                <p className="text-stone-500">
+                  Select a mood and we&apos;ll find the perfect piano pieces for
+                  you
                 </p>
               </div>
 
-              {/* Mood Selection */}
+              {/* Mood Grid */}
               <div>
-                <p className="text-sm font-medium text-neutral-500 mb-3">
-                  Select a mood
+                <p className="text-sm font-medium text-stone-400 mb-3">
+                  Choose your mood
                 </p>
                 <div className="grid grid-cols-4 gap-2">
                   {MOODS.map((mood) => (
@@ -231,16 +265,17 @@ export default function PlaylistPage() {
                       key={mood.id}
                       onClick={() => setSelectedMood(mood.id)}
                       className={`
-                        p-4 rounded-xl border-2 transition-all text-center
+                        p-4 rounded-2xl border-2 transition-all text-center cursor-pointer
+                        bg-gradient-to-br ${mood.bg}
                         ${
                           selectedMood === mood.id
-                            ? "border-sage-400 bg-sage-50"
-                            : "border-base-200 bg-white hover:border-base-300 hover:bg-base-100"
+                            ? "border-mint-400 shadow-md scale-[1.02] bg-white"
+                            : "border-stone-200 hover:border-mint-300 bg-white"
                         }
                       `}
                     >
                       <span className="text-2xl block mb-1">{mood.emoji}</span>
-                      <span className="text-xs text-neutral-600">
+                      <span className="text-xs font-medium text-forest-700">
                         {mood.label}
                       </span>
                     </button>
@@ -248,11 +283,11 @@ export default function PlaylistPage() {
                 </div>
               </div>
 
-              {/* Situation Selection */}
+              {/* Situation Tags */}
               <div>
-                <p className="text-sm font-medium text-neutral-500 mb-3">
+                <p className="text-sm font-medium text-stone-400 mb-3">
                   What are you doing?{" "}
-                  <span className="text-neutral-400">(optional)</span>
+                  <span className="text-stone-300">(optional)</span>
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {SITUATIONS.map((situation) => (
@@ -266,11 +301,11 @@ export default function PlaylistPage() {
                         )
                       }
                       className={`
-                        px-4 py-2 rounded-full text-sm transition-all
+                        px-4 py-2 rounded-full text-sm transition-all cursor-pointer
                         ${
                           selectedSituation === situation.id
-                            ? "bg-neutral-800 text-white"
-                            : "bg-base-200 text-neutral-600 hover:bg-base-300"
+                            ? "bg-stone-800 text-white shadow-soft"
+                            : "bg-white text-stone-600 border border-stone-200 hover:border-mint-300"
                         }
                       `}
                     >
@@ -282,27 +317,45 @@ export default function PlaylistPage() {
 
               {/* Error */}
               {error && (
-                <div className="text-center text-red-600 bg-red-50 py-3 px-4 rounded-xl text-sm">
+                <div className="text-center text-red-600 bg-red-50/50 backdrop-blur-sm py-3 px-4 rounded-xl text-sm border border-red-100">
                   {error}
                 </div>
               )}
 
               {/* Generate Button */}
-              <div className="text-center pt-2">
+              <div className="text-center pt-4">
                 <button
                   onClick={generatePlaylist}
                   disabled={!selectedMood || isLoading}
-                  className="px-8 py-3 bg-neutral-800 hover:bg-neutral-900 text-white 
-                           rounded-full font-medium transition-colors
+                  className="px-8 py-3.5 bg-stone-800 hover:bg-stone-900 text-white 
+                           rounded-full font-medium transition-all shadow-soft cursor-pointer
                            disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <span className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <svg
+                        className="w-5 h-5 animate-spin"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
+                      </svg>
                       Creating playlist...
                     </span>
                   ) : (
-                    "Generate Playlist"
+                    "✨ Generate Playlist"
                   )}
                 </button>
 
@@ -313,8 +366,8 @@ export default function PlaylistPage() {
                     setSelectedMood(randomMood);
                   }}
                   disabled={isLoading}
-                  className="block mx-auto mt-4 text-sm text-neutral-400 hover:text-neutral-600 
-                           transition-colors disabled:opacity-50"
+                  className="block mx-auto mt-4 text-sm text-stone-400 hover:text-mint-600 
+                           transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                 >
                   🎲 Surprise me
                 </button>
