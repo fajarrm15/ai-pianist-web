@@ -764,16 +764,23 @@ export default function PianoPage() {
       `}</style>
 
       <main
-        className={`min-h-screen bg-gradient-to-b from-stone-100 via-sage-50 to-stone-100 flex flex-col ${
+        className={`min-h-screen bg-gradient-to-b from-stone-50 via-mint-50/30 to-stone-50 flex flex-col ${
           screenShake ? "screen-shake" : ""
         }`}
       >
+        {/* Decorative background elements */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-10 w-64 h-64 bg-mint-200/20 rounded-full blur-3xl" />
+          <div className="absolute bottom-20 right-10 w-80 h-80 bg-sage-200/20 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-mint-100/30 rounded-full blur-3xl" />
+        </div>
+
         {/* Header */}
-        <header className="glass border-b border-stone-200/50">
+        <header className="bg-white/70 backdrop-blur-xl border-b border-mint-100 sticky top-0 z-10">
           <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
             <Link
               href="/"
-              className="flex items-center gap-2 text-stone-400 hover:text-stone-600 transition-colors"
+              className="flex items-center gap-2 text-stone-400 hover:text-mint-600 transition-colors cursor-pointer"
             >
               <svg
                 className="w-5 h-5"
@@ -792,19 +799,32 @@ export default function PianoPage() {
             </Link>
 
             {/* Mode Toggle */}
-            <div className="flex items-center gap-1 bg-white border border-stone-200 p-1 rounded-xl">
+            <div className="flex items-center gap-2 bg-mint-50 border border-mint-200 p-1.5 rounded-2xl">
               <button
                 onClick={() => {
                   setMode("freeplay");
                   resetGame();
                   setSelectedSong(null);
                 }}
-                className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all cursor-pointer ${
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl transition-all cursor-pointer ${
                   mode === "freeplay"
-                    ? "bg-stone-800 text-white"
-                    : "text-stone-500 hover:text-stone-700"
+                    ? "bg-white text-stone-800 shadow-sm border border-mint-200"
+                    : "text-stone-500 hover:text-stone-700 hover:bg-white/50"
                 }`}
               >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+                  />
+                </svg>
                 Free Play
               </button>
               <button
@@ -812,13 +832,31 @@ export default function PianoPage() {
                   setMode("game");
                   resetGame();
                 }}
-                className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all cursor-pointer ${
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl transition-all cursor-pointer ${
                   mode === "game"
-                    ? "bg-stone-800 text-white"
-                    : "text-stone-500 hover:text-stone-700"
+                    ? "bg-white text-stone-800 shadow-sm border border-mint-200"
+                    : "text-stone-500 hover:text-stone-700 hover:bg-white/50"
                 }`}
               >
-                🎮 Game
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Game Mode
               </button>
             </div>
 
@@ -827,18 +865,58 @@ export default function PianoPage() {
         </header>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col relative z-0">
           {mode === "freeplay" ? (
             // ============== FREE PLAY MODE ==============
             <div className="flex-1 flex flex-col items-center justify-center p-6">
-              <div className="text-center mb-6">
-                <p className="text-stone-600 mb-1">
-                  Click the keys or use your keyboard
-                </p>
-                <p className="text-sm text-stone-400">
-                  A S D F G H J K L ; &nbsp;·&nbsp; W E T Y U O P
+              {/* Title Section */}
+              <div className="text-center mb-8">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-mint-100 rounded-full mb-4">
+                  <div className="w-2 h-2 rounded-full bg-mint-500 animate-pulse" />
+                  <span className="text-sm font-medium text-mint-700">
+                    Free Play Mode
+                  </span>
+                </div>
+                <h1 className="font-display text-2xl font-semibold text-stone-800 mb-2">
+                  Play the Piano
+                </h1>
+                <p className="text-stone-500">
+                  Click the keys or use your keyboard to play
                 </p>
               </div>
+
+              {/* Keyboard hints */}
+              <div className="flex items-center gap-6 mb-6">
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-stone-400">White keys:</span>
+                  <div className="flex gap-1">
+                    {["A", "S", "D", "F", "G", "H", "J", "K", "L", ";"].map(
+                      (key) => (
+                        <span
+                          key={key}
+                          className="w-6 h-6 bg-white border border-stone-200 rounded text-xs flex items-center justify-center text-stone-600 font-mono shadow-sm"
+                        >
+                          {key}
+                        </span>
+                      )
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-stone-400">Black keys:</span>
+                  <div className="flex gap-1">
+                    {["W", "E", "T", "Y", "U", "O", "P"].map((key) => (
+                      <span
+                        key={key}
+                        className="w-6 h-6 bg-stone-800 border border-stone-700 rounded text-xs flex items-center justify-center text-stone-300 font-mono shadow-sm"
+                      >
+                        {key}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               <PianoKeyboard
                 isLoaded={isLoaded}
                 loadingProgress={loadingProgress}
@@ -847,6 +925,42 @@ export default function PianoPage() {
                 onKeyDown={playNote}
                 onKeyUp={stopNote}
               />
+
+              {/* Tips */}
+              <div className="mt-8 flex items-center gap-6 text-sm text-stone-400">
+                <div className="flex items-center gap-2">
+                  <svg
+                    className="w-4 h-4 text-mint-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span>Hold keys for sustained notes</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <svg
+                    className="w-4 h-4 text-mint-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+                    />
+                  </svg>
+                  <span>Try Game Mode to practice songs!</span>
+                </div>
+              </div>
             </div>
           ) : (
             // ============== GAME MODE ==============
