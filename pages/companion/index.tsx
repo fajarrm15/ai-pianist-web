@@ -188,7 +188,7 @@ export default function CompanionPage() {
                   <div
                     className={`px-4 py-3 rounded-2xl shadow-sm ${
                       message.role === "user"
-                        ? "bg-gradient-to-r from-mint-500 to-sage-500 text-white rounded-br-md"
+                        ? "bg-stone-800 text-white rounded-br-md"
                         : "bg-white text-stone-700 rounded-bl-md border border-mint-100"
                     }`}
                   >

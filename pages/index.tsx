@@ -1,6 +1,46 @@
 import Link from "next/link";
 import Head from "next/head";
+import { useState, useEffect, useRef, useCallback } from "react";
 
+// ============== QUOTES ==============
+const MUSIC_QUOTES = [
+  {
+    text: "Music is the universal language of mankind.",
+    author: "Henry Wadsworth Longfellow",
+  },
+  {
+    text: "Where words fail, music speaks.",
+    author: "Hans Christian Andersen",
+  },
+  {
+    text: "The piano keys are black and white, but they sound like a million colors in your mind.",
+    author: "Maria Cristina Mena",
+  },
+  {
+    text: "Music gives a soul to the universe, wings to the mind, flight to the imagination.",
+    author: "Plato",
+  },
+  {
+    text: "One good thing about music, when it hits you, you feel no pain.",
+    author: "Bob Marley",
+  },
+  {
+    text: "Without music, life would be a mistake.",
+    author: "Friedrich Nietzsche",
+  },
+  { text: "Music is the strongest form of magic.", author: "Marilyn Manson" },
+  { text: "The only truth is music.", author: "Jack Kerouac" },
+  {
+    text: "Music expresses that which cannot be put into words.",
+    author: "Victor Hugo",
+  },
+  {
+    text: "Life is like a piano. What you get out of it depends on how you play it.",
+    author: "Tom Lehrer",
+  },
+];
+
+// ============== FEATURES ==============
 const features = [
   {
     title: "Piano Buddy",
@@ -70,7 +110,42 @@ const features = [
   },
 ];
 
-// Mini piano keys decoration
+// ============== FLOATING MUSIC NOTES ==============
+const NOTE_SYMBOLS = ["♪", "♫", "♬", "𝄞"];
+
+// Pre-generate notes data (static, no randomness needed at runtime)
+const FLOATING_NOTES = [
+  { id: 0, x: 10, delay: 0, duration: 10, symbol: "♪" },
+  { id: 1, x: 25, delay: 2, duration: 12, symbol: "♫" },
+  { id: 2, x: 40, delay: 1, duration: 9, symbol: "♬" },
+  { id: 3, x: 55, delay: 3, duration: 11, symbol: "𝄞" },
+  { id: 4, x: 70, delay: 0.5, duration: 10, symbol: "♪" },
+  { id: 5, x: 85, delay: 4, duration: 8, symbol: "♫" },
+  { id: 6, x: 15, delay: 2.5, duration: 12, symbol: "♬" },
+  { id: 7, x: 90, delay: 1.5, duration: 9, symbol: "𝄞" },
+];
+
+function FloatingNotes() {
+  return (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+      {FLOATING_NOTES.map((note) => (
+        <div
+          key={note.id}
+          className="absolute text-mint-300/30 text-2xl animate-float-up"
+          style={{
+            left: `${note.x}%`,
+            animationDelay: `${note.delay}s`,
+            animationDuration: `${note.duration}s`,
+          }}
+        >
+          {note.symbol}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ============== PIANO DECORATION ==============
 function PianoDecoration() {
   return (
     <div className="flex items-end justify-center gap-[2px] h-8 opacity-40">
@@ -86,7 +161,30 @@ function PianoDecoration() {
   );
 }
 
+// ============== QUOTE HOOK ==============
+function useRotatingQuote() {
+  const [quoteIndex, setQuoteIndex] = useState(0);
+  const [isQuoteFading, setIsQuoteFading] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsQuoteFading(true);
+      setTimeout(() => {
+        setQuoteIndex((prev) => (prev + 1) % MUSIC_QUOTES.length);
+        setIsQuoteFading(false);
+      }, 500);
+    }, 9000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return { quote: MUSIC_QUOTES[quoteIndex], isQuoteFading };
+}
+
+// ============== MAIN COMPONENT ==============
 export default function Home() {
+  const { quote, isQuoteFading } = useRotatingQuote();
+
   return (
     <>
       <Head>
@@ -99,6 +197,9 @@ export default function Home() {
       </Head>
 
       <main className="min-h-screen relative overflow-hidden">
+        {/* Floating music notes */}
+        <FloatingNotes />
+
         {/* Background decorations */}
         <div className="fixed inset-0 pointer-events-none">
           <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-mint-200/30 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
@@ -109,7 +210,7 @@ export default function Home() {
         {/* Content */}
         <div className="relative z-10">
           {/* Hero */}
-          <section className="max-w-5xl mx-auto px-6 pt-16 pb-12 md:pt-24 md:pb-16">
+          <section className="max-w-5xl mx-auto px-6 pt-16 pb-8 md:pt-24 md:pb-12">
             <div className="text-center animate-fade-in">
               {/* Piano decoration */}
               <div className="mb-6">
@@ -129,10 +230,20 @@ export default function Home() {
               </h1>
 
               {/* Subtitle */}
-              <p className="text-lg md:text-xl text-stone-500 max-w-lg mx-auto leading-relaxed">
+              <p className="text-lg md:text-xl text-stone-500 max-w-lg mx-auto leading-relaxed mb-8">
                 Practice, play, and discover beautiful piano pieces — all in one
                 elegant place.
               </p>
+
+              {/* Quote */}
+              <div
+                className={`max-w-md mx-auto transition-opacity duration-500 ${isQuoteFading ? "opacity-0" : "opacity-100"}`}
+              >
+                <blockquote className="text-stone-400 italic text-sm">
+                  &quot;{quote.text}&quot;
+                </blockquote>
+                <p className="text-mint-600 text-xs mt-1">— {quote.author}</p>
+              </div>
             </div>
           </section>
 
@@ -153,7 +264,8 @@ export default function Home() {
                     border border-stone-200
                     shadow-card hover:shadow-card-hover
                     transition-all duration-300
-                    hover:-translate-y-1
+                    hover:-translate-y-2 hover:scale-[1.02]
+                    active:scale-[0.98]
                   `}
                   >
                     {/* Icon */}
@@ -161,14 +273,14 @@ export default function Home() {
                       className={`
                       w-12 h-12 rounded-2xl ${feature.iconBg}
                       flex items-center justify-center mb-4
-                      group-hover:scale-110 transition-transform duration-300
+                      group-hover:scale-110 group-hover:rotate-3 transition-all duration-300
                     `}
                     >
                       {feature.icon}
                     </div>
 
                     {/* Content */}
-                    <h2 className="font-display text-xl font-semibold text-stone-800 mb-2">
+                    <h2 className="font-display text-xl font-semibold text-stone-800 mb-2 group-hover:text-mint-700 transition-colors">
                       {feature.title}
                     </h2>
                     <p className="text-stone-500 text-sm leading-relaxed mb-4">
@@ -179,7 +291,7 @@ export default function Home() {
                     <div className="flex items-center gap-1 text-sm font-medium text-mint-600 group-hover:text-mint-500">
                       <span>Explore</span>
                       <svg
-                        className="w-4 h-4 group-hover:translate-x-1 transition-transform"
+                        className="w-4 h-4 group-hover:translate-x-2 transition-transform duration-300"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -204,7 +316,9 @@ export default function Home() {
           {/* Footer */}
           <footer className="text-center py-8 border-t border-sage-100/50">
             <p className="text-sm text-stone-400">
-              Happy Pianing <span className="text-mint-500">♥</span>
+              <span className="text-mint-500 animate-pulse">♫</span>
+              Happy Pianing{" "}
+              <span className="text-mint-500 animate-pulse">♫</span>
             </p>
           </footer>
         </div>
