@@ -2,250 +2,26 @@ import Link from "next/link";
 import Head from "next/head";
 import { useState, useEffect, useCallback, useRef } from "react";
 import * as Tone from "tone";
-
-// ============== PIANO KEY CONFIG ==============
-const OCTAVE_KEYS = [
-  { note: "C", type: "white", keyboardKey: "a" },
-  { note: "C#", type: "black", keyboardKey: "w" },
-  { note: "D", type: "white", keyboardKey: "s" },
-  { note: "D#", type: "black", keyboardKey: "e" },
-  { note: "E", type: "white", keyboardKey: "d" },
-  { note: "F", type: "white", keyboardKey: "f" },
-  { note: "F#", type: "black", keyboardKey: "t" },
-  { note: "G", type: "white", keyboardKey: "g" },
-  { note: "G#", type: "black", keyboardKey: "y" },
-  { note: "A", type: "white", keyboardKey: "h" },
-  { note: "A#", type: "black", keyboardKey: "u" },
-  { note: "B", type: "white", keyboardKey: "j" },
-];
-
-const OCTAVE_2_KEYS = [
-  { note: "C", type: "white", keyboardKey: "k" },
-  { note: "C#", type: "black", keyboardKey: "o" },
-  { note: "D", type: "white", keyboardKey: "l" },
-  { note: "D#", type: "black", keyboardKey: "p" },
-  { note: "E", type: "white", keyboardKey: ";" },
-];
-
-interface PianoKey {
-  note: string;
-  type: "white" | "black";
-  keyboardKey: string;
-  octave: number;
-  fullNote: string;
-}
-
-const PIANO_KEYS: PianoKey[] = [
-  ...OCTAVE_KEYS.map((k) => ({ ...k, octave: 4, fullNote: `${k.note}4` })),
-  ...OCTAVE_2_KEYS.map((k) => ({ ...k, octave: 5, fullNote: `${k.note}5` })),
-] as PianoKey[];
-
-const WHITE_KEYS = PIANO_KEYS.filter((k) => k.type === "white");
-
-// ============== SONGS ==============
-interface SongNote {
-  note: string;
-  time: number;
-  duration: number;
-}
-
-interface Song {
-  id: string;
-  title: string;
-  artist: string;
-  difficulty: "Easy" | "Medium" | "Hard";
-  notes: SongNote[];
-}
-
-const SONGS: Song[] = [
-  {
-    id: "twinkle",
-    title: "Twinkle Twinkle",
-    artist: "Traditional",
-    difficulty: "Easy",
-    notes: [
-      { note: "C4", time: 0, duration: 400 },
-      { note: "C4", time: 500, duration: 400 },
-      { note: "G4", time: 1000, duration: 400 },
-      { note: "G4", time: 1500, duration: 400 },
-      { note: "A4", time: 2000, duration: 400 },
-      { note: "A4", time: 2500, duration: 400 },
-      { note: "G4", time: 3000, duration: 800 },
-      { note: "F4", time: 4000, duration: 400 },
-      { note: "F4", time: 4500, duration: 400 },
-      { note: "E4", time: 5000, duration: 400 },
-      { note: "E4", time: 5500, duration: 400 },
-      { note: "D4", time: 6000, duration: 400 },
-      { note: "D4", time: 6500, duration: 400 },
-      { note: "C4", time: 7000, duration: 800 },
-      // Second verse
-      { note: "G4", time: 8500, duration: 400 },
-      { note: "G4", time: 9000, duration: 400 },
-      { note: "F4", time: 9500, duration: 400 },
-      { note: "F4", time: 10000, duration: 400 },
-      { note: "E4", time: 10500, duration: 400 },
-      { note: "E4", time: 11000, duration: 400 },
-      { note: "D4", time: 11500, duration: 800 },
-    ],
-  },
-  {
-    id: "mary",
-    title: "Mary Had a Little Lamb",
-    artist: "Traditional",
-    difficulty: "Easy",
-    notes: [
-      { note: "E4", time: 0, duration: 400 },
-      { note: "D4", time: 500, duration: 400 },
-      { note: "C4", time: 1000, duration: 400 },
-      { note: "D4", time: 1500, duration: 400 },
-      { note: "E4", time: 2000, duration: 400 },
-      { note: "E4", time: 2500, duration: 400 },
-      { note: "E4", time: 3000, duration: 800 },
-      { note: "D4", time: 4000, duration: 400 },
-      { note: "D4", time: 4500, duration: 400 },
-      { note: "D4", time: 5000, duration: 800 },
-      { note: "E4", time: 6000, duration: 400 },
-      { note: "G4", time: 6500, duration: 400 },
-      { note: "G4", time: 7000, duration: 800 },
-      { note: "E4", time: 8500, duration: 400 },
-      { note: "D4", time: 9000, duration: 400 },
-      { note: "C4", time: 9500, duration: 400 },
-      { note: "D4", time: 10000, duration: 400 },
-      { note: "E4", time: 10500, duration: 400 },
-      { note: "E4", time: 11000, duration: 400 },
-      { note: "E4", time: 11500, duration: 400 },
-      { note: "E4", time: 12000, duration: 400 },
-      { note: "D4", time: 12500, duration: 400 },
-      { note: "D4", time: 13000, duration: 400 },
-      { note: "E4", time: 13500, duration: 400 },
-      { note: "D4", time: 14000, duration: 400 },
-      { note: "C4", time: 14500, duration: 800 },
-    ],
-  },
-  {
-    id: "ode",
-    title: "Ode to Joy",
-    artist: "Beethoven",
-    difficulty: "Medium",
-    notes: [
-      { note: "E4", time: 0, duration: 400 },
-      { note: "E4", time: 500, duration: 400 },
-      { note: "F4", time: 1000, duration: 400 },
-      { note: "G4", time: 1500, duration: 400 },
-      { note: "G4", time: 2000, duration: 400 },
-      { note: "F4", time: 2500, duration: 400 },
-      { note: "E4", time: 3000, duration: 400 },
-      { note: "D4", time: 3500, duration: 400 },
-      { note: "C4", time: 4000, duration: 400 },
-      { note: "C4", time: 4500, duration: 400 },
-      { note: "D4", time: 5000, duration: 400 },
-      { note: "E4", time: 5500, duration: 400 },
-      { note: "E4", time: 6000, duration: 600 },
-      { note: "D4", time: 6700, duration: 200 },
-      { note: "D4", time: 7000, duration: 800 },
-      // Second part
-      { note: "E4", time: 8500, duration: 400 },
-      { note: "E4", time: 9000, duration: 400 },
-      { note: "F4", time: 9500, duration: 400 },
-      { note: "G4", time: 10000, duration: 400 },
-      { note: "G4", time: 10500, duration: 400 },
-      { note: "F4", time: 11000, duration: 400 },
-      { note: "E4", time: 11500, duration: 400 },
-      { note: "D4", time: 12000, duration: 400 },
-      { note: "C4", time: 12500, duration: 400 },
-      { note: "C4", time: 13000, duration: 400 },
-      { note: "D4", time: 13500, duration: 400 },
-      { note: "E4", time: 14000, duration: 400 },
-      { note: "D4", time: 14500, duration: 600 },
-      { note: "C4", time: 15200, duration: 200 },
-      { note: "C4", time: 15500, duration: 800 },
-    ],
-  },
-  {
-    id: "canon",
-    title: "Canon in D (Simple)",
-    artist: "Pachelbel",
-    difficulty: "Medium",
-    notes: [
-      { note: "F4", time: 0, duration: 500 },
-      { note: "E4", time: 600, duration: 500 },
-      { note: "D4", time: 1200, duration: 500 },
-      { note: "C4", time: 1800, duration: 500 },
-      { note: "B4", time: 2400, duration: 500 },
-      { note: "A4", time: 3000, duration: 500 },
-      { note: "B4", time: 3600, duration: 500 },
-      { note: "C5", time: 4200, duration: 500 },
-      { note: "F4", time: 5000, duration: 500 },
-      { note: "E4", time: 5600, duration: 500 },
-      { note: "D4", time: 6200, duration: 500 },
-      { note: "C4", time: 6800, duration: 500 },
-      { note: "B4", time: 7400, duration: 500 },
-      { note: "A4", time: 8000, duration: 500 },
-      { note: "B4", time: 8600, duration: 500 },
-      { note: "C5", time: 9200, duration: 500 },
-    ],
-  },
-];
-
-// ============== SAMPLER CONFIG ==============
-const SAMPLE_BASE_URL = "https://tonejs.github.io/audio/salamander/";
-const PIANO_SAMPLES: { [key: string]: string } = {
-  A0: "A0.mp3",
-  C1: "C1.mp3",
-  "D#1": "Ds1.mp3",
-  "F#1": "Fs1.mp3",
-  A1: "A1.mp3",
-  C2: "C2.mp3",
-  "D#2": "Ds2.mp3",
-  "F#2": "Fs2.mp3",
-  A2: "A2.mp3",
-  C3: "C3.mp3",
-  "D#3": "Ds3.mp3",
-  "F#3": "Fs3.mp3",
-  A3: "A3.mp3",
-  C4: "C4.mp3",
-  "D#4": "Ds4.mp3",
-  "F#4": "Fs4.mp3",
-  A4: "A4.mp3",
-  C5: "C5.mp3",
-  "D#5": "Ds5.mp3",
-  "F#5": "Fs5.mp3",
-  A5: "A5.mp3",
-  C6: "C6.mp3",
-  "D#6": "Ds6.mp3",
-  "F#6": "Fs6.mp3",
-  A6: "A6.mp3",
-  C7: "C7.mp3",
-  "D#7": "Ds7.mp3",
-  "F#7": "Fs7.mp3",
-  A7: "A7.mp3",
-  C8: "C8.mp3",
-};
-
-// Game constants
-const FALL_DURATION = 2500; // Slower for better timing
-const HIT_WINDOW_PERFECT = 100; // ±100ms for perfect
-const HIT_WINDOW_GOOD = 180; // ±180ms for good
-const HIT_WINDOW_MISS = 280; // ±280ms to still register as a hit attempt
-
-// ============== GAME TYPES ==============
-interface GameNote {
-  id: string;
-  note: string;
-  time: number;
-  duration: number;
-  status: "pending" | "hit" | "missed";
-  hitRating?: "perfect" | "good";
-}
-
-type HitRating = "perfect" | "good" | "miss";
-
-interface HitEffect {
-  id: string;
-  x: number;
-  rating: HitRating;
-  timestamp: number;
-}
+import {
+  PIANO_KEYS,
+  WHITE_KEYS,
+  SAMPLE_BASE_URL,
+  PIANO_SAMPLES,
+  KEY_TO_NOTE_MAP,
+  SONGS,
+  FALL_DURATION,
+  HIT_WINDOW_PERFECT,
+  HIT_WINDOW_GOOD,
+  HIT_WINDOW_MISS,
+  getComboMultiplier,
+  initialGameStats,
+  type PianoKey,
+  type Song,
+  type GameNote,
+  type HitRating,
+  type GameState,
+  type HitEffect,
+} from "@/const";
 
 // ============== COMPONENT ==============
 export default function PianoPage() {
@@ -261,15 +37,13 @@ export default function PianoPage() {
   // Game mode state
   const [mode, setMode] = useState<"freeplay" | "game">("freeplay");
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
-  const [gameState, setGameState] = useState<
-    "idle" | "countdown" | "playing" | "paused" | "ended"
-  >("idle");
+  const [gameState, setGameState] = useState<GameState>("idle");
   const [countdown, setCountdown] = useState(3);
   const [gameNotes, setGameNotes] = useState<GameNote[]>([]);
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
   const [maxCombo, setMaxCombo] = useState(0);
-  const [stats, setStats] = useState({ perfect: 0, good: 0, miss: 0 });
+  const [stats, setStats] = useState(initialGameStats);
   const [hitEffects, setHitEffects] = useState<HitEffect[]>([]);
   const [screenShake, setScreenShake] = useState(false);
 
@@ -342,10 +116,10 @@ export default function PianoPage() {
             next.delete(note);
             return next;
           }),
-        150
+        150,
       );
     },
-    [isLoaded, startAudio]
+    [isLoaded, startAudio],
   );
 
   const stopNote = useCallback((note: string) => {
@@ -428,7 +202,7 @@ export default function PianoPage() {
     setScore(0);
     setCombo(0);
     setMaxCombo(0);
-    setStats({ perfect: 0, good: 0, miss: 0 });
+    setStats(initialGameStats);
     setHitEffects([]);
     currentTimeRef.current = 0;
 
@@ -456,7 +230,7 @@ export default function PianoPage() {
     setScore(0);
     setCombo(0);
     setMaxCombo(0);
-    setStats({ perfect: 0, good: 0, miss: 0 });
+    setStats(initialGameStats);
     setHitEffects([]);
     setCountdown(3);
     cancelAnimationFrame(animationRef.current);
@@ -556,7 +330,7 @@ export default function PianoPage() {
                 status: "hit" as const,
                 hitRating: rating !== "miss" ? rating : undefined,
               }
-            : n
+            : n,
         );
         setGameNotes([...gameNotesRef.current]);
 
@@ -566,7 +340,7 @@ export default function PianoPage() {
 
         if (rating !== "miss") {
           const newCombo = combo + 1;
-          const multiplier = Math.min(1 + Math.floor(newCombo / 10) * 0.1, 2);
+          const multiplier = getComboMultiplier(newCombo);
 
           setScore((prev) => prev + Math.round(points * multiplier));
           setCombo(newCombo);
@@ -575,15 +349,11 @@ export default function PianoPage() {
         }
       }
     },
-    [gameState, combo, playNote, getKeyPosition, addHitEffect]
+    [gameState, combo, playNote, getKeyPosition, addHitEffect],
   );
 
   // ============== KEYBOARD HANDLERS ==============
   useEffect(() => {
-    const keyMap = new Map(
-      PIANO_KEYS.map((k) => [k.keyboardKey.toLowerCase(), k.fullNote])
-    );
-
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.repeat) return;
 
@@ -606,7 +376,7 @@ export default function PianoPage() {
         }
       }
 
-      const note = keyMap.get(e.key.toLowerCase());
+      const note = KEY_TO_NOTE_MAP.get(e.key.toLowerCase());
       if (note) {
         e.preventDefault();
         if (mode === "freeplay") {
@@ -618,7 +388,7 @@ export default function PianoPage() {
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      const note = keyMap.get(e.key.toLowerCase());
+      const note = KEY_TO_NOTE_MAP.get(e.key.toLowerCase());
       if (note) {
         e.preventDefault();
         stopNote(note); // Release note in both freeplay and game mode
@@ -717,7 +487,9 @@ export default function PianoPage() {
             box-shadow: 0 0 10px currentColor;
           }
           50% {
-            box-shadow: 0 0 20px currentColor, 0 0 30px currentColor;
+            box-shadow:
+              0 0 20px currentColor,
+              0 0 30px currentColor;
           }
         }
         @keyframes countdownPulse {
@@ -764,9 +536,7 @@ export default function PianoPage() {
       `}</style>
 
       <main
-        className={`min-h-screen bg-gradient-to-b from-stone-50 via-mint-50/30 to-stone-50 flex flex-col ${
-          screenShake ? "screen-shake" : ""
-        }`}
+        className={`min-h-screen bg-gradient-to-b from-stone-50 via-mint-50/30 to-stone-50 flex flex-col ${screenShake ? "screen-shake" : ""}`}
       >
         {/* Decorative background elements */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -898,7 +668,7 @@ export default function PianoPage() {
                         >
                           {key}
                         </span>
-                      )
+                      ),
                     )}
                   </div>
                 </div>
@@ -990,8 +760,8 @@ export default function PianoPage() {
                               song.difficulty === "Easy"
                                 ? "bg-mint-100 text-mint-700"
                                 : song.difficulty === "Medium"
-                                ? "bg-amber-100 text-amber-700"
-                                : "bg-rose-100 text-rose-700"
+                                  ? "bg-amber-100 text-amber-700"
+                                  : "bg-rose-100 text-rose-700"
                             }`}
                           >
                             {song.difficulty}
@@ -1014,15 +784,15 @@ export default function PianoPage() {
                         {stats.perfect > stats.good + stats.miss
                           ? "🌟"
                           : stats.miss > stats.perfect + stats.good
-                          ? "💪"
-                          : "🎉"}
+                            ? "💪"
+                            : "🎉"}
                       </div>
                       <h2 className="font-display text-3xl font-bold text-stone-800">
                         {stats.perfect > stats.good + stats.miss
                           ? "Amazing!"
                           : stats.miss > stats.perfect + stats.good
-                          ? "Keep Practicing!"
-                          : "Well Done!"}
+                            ? "Keep Practicing!"
+                            : "Well Done!"}
                       </h2>
                       <p className="text-stone-500">{selectedSong.title}</p>
                     </div>
@@ -1104,8 +874,8 @@ export default function PianoPage() {
                             combo >= 20
                               ? "text-mint-500"
                               : combo >= 10
-                              ? "text-amber-500"
-                              : "text-stone-800"
+                                ? "text-amber-500"
+                                : "text-stone-800"
                           }`}
                         >
                           {combo}x
@@ -1199,8 +969,8 @@ export default function PianoPage() {
                             effect.rating === "perfect"
                               ? "border-emerald-400"
                               : effect.rating === "good"
-                              ? "border-amber-400"
-                              : "border-rose-400"
+                                ? "border-amber-400"
+                                : "border-rose-400"
                           }`}
                           style={{ transform: "translate(-50%, -50%)" }}
                         />
@@ -1218,15 +988,15 @@ export default function PianoPage() {
                               effect.rating === "perfect"
                                 ? "text-emerald-400"
                                 : effect.rating === "good"
-                                ? "text-amber-400"
-                                : "text-rose-400"
+                                  ? "text-amber-400"
+                                  : "text-rose-400"
                             }`}
                           >
                             {effect.rating === "perfect"
                               ? "PERFECT!"
                               : effect.rating === "good"
-                              ? "GOOD!"
-                              : "MISS"}
+                                ? "GOOD!"
+                                : "MISS"}
                           </span>
                         </div>
                       </div>
@@ -1242,9 +1012,7 @@ export default function PianoPage() {
                         return (
                           <div
                             key={note.id}
-                            className={`absolute transition-opacity duration-100 ${
-                              note.status === "missed" ? "opacity-30" : ""
-                            }`}
+                            className={`absolute transition-opacity duration-100 ${note.status === "missed" ? "opacity-30" : ""}`}
                             style={style}
                           >
                             <div
@@ -1484,11 +1252,7 @@ function MiniPiano({
             }}
             className={`relative flex-1 mx-px rounded-b-lg flex items-end justify-center pb-1 transition-all border border-stone-600
               ${flashKeys.has(key.fullNote) ? "scale-[0.97]" : ""}
-              ${
-                activeKeys.has(key.fullNote)
-                  ? "bg-mint-300 border-mint-400"
-                  : "bg-stone-200 hover:bg-white"
-              }`}
+              ${activeKeys.has(key.fullNote) ? "bg-mint-300 border-mint-400" : "bg-stone-200 hover:bg-white"}`}
           >
             <span className="text-[9px] text-stone-500 font-medium uppercase">
               {key.keyboardKey}
@@ -1511,11 +1275,7 @@ function MiniPiano({
             }}
             className={`absolute h-full rounded-b-md pointer-events-auto transition-all
               ${flashKeys.has(key.fullNote) ? "scale-[0.97]" : ""}
-              ${
-                activeKeys.has(key.fullNote)
-                  ? "bg-stone-400"
-                  : "bg-stone-900 hover:bg-stone-700"
-              }`}
+              ${activeKeys.has(key.fullNote) ? "bg-stone-400" : "bg-stone-900 hover:bg-stone-700"}`}
           />
         ))}
       </div>

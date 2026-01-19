@@ -1,93 +1,89 @@
-import Link from "next/link";
 import Head from "next/head";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import {
+  PageLayout,
+  Header,
+  IconAvatar,
+  Button,
+  MiniPianoDecoration,
+} from "@/components";
+import { QUICK_PROMPTS, WELCOME_MESSAGE, type Message } from "@/const";
 
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-}
-
-const quickPrompts = [
-  {
-    label: "🎯 10 min warm-up",
-    prompt: "Give me a quick 10 minute piano warm-up routine",
-  },
-  {
-    label: "💪 Motivate me",
-    prompt: "I'm not feeling motivated to practice today. Can you help?",
-  },
-  {
-    label: "🌱 Beginner tips",
-    prompt: "What are some essential tips for a beginner piano player?",
-  },
-  {
-    label: "🎹 Left hand drills",
-    prompt: "Give me some exercises to improve my left hand independence",
-  },
-  {
-    label: "📚 Music theory",
-    prompt: "Explain a music theory concept that will help my piano playing",
-  },
-  {
-    label: "🎵 Song suggestion",
-    prompt: "Suggest a beautiful piano piece for an intermediate player",
-  },
-];
-
-// Mini piano keys decoration
-function MiniPianoKeys({ className = "" }: { className?: string }) {
-  const keys = [
-    { white: true },
-    { white: false },
-    { white: true },
-    { white: false },
-    { white: true },
-    { white: true },
-    { white: false },
-    { white: true },
-    { white: false },
-    { white: true },
-    { white: false },
-    { white: true },
-  ];
-
-  return (
-    <div className={`flex ${className}`}>
-      {keys.map((key, i) => (
-        <div
-          key={i}
-          className={`${
-            key.white
-              ? "w-4 h-8 bg-white border border-stone-200 rounded-b"
-              : "w-2.5 h-5 bg-stone-700 rounded-b -mx-1.5 z-10"
-          }`}
-        />
-      ))}
-    </div>
-  );
-}
+const STORAGE_KEY = "piano-buddy-chat-history";
 
 export default function CompanionPage() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "welcome",
-      role: "assistant",
-      content:
-        "Hey there! 🎹 I'm your Piano Buddy — here to help with practice tips, warm-ups, motivation, or anything piano-related. What's on your mind today?",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isWarmedUp, setIsWarmedUp] = useState(false);
+  const [isWarmingUp, setIsWarmingUp] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // Load chat history from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved) as Message[];
+        if (parsed.length > 0) {
+          setMessages(parsed);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load chat history:", error);
+    }
+    setIsLoaded(true);
+  }, []);
+
+  // Save chat history to localStorage whenever messages change
+  useEffect(() => {
+    if (isLoaded && messages.length > 0) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+      } catch (error) {
+        console.error("Failed to save chat history:", error);
+      }
+    }
+  }, [messages, isLoaded]);
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Pre-warm the LLM when page loads
+  useEffect(() => {
+    const warmUp = async () => {
+      setIsWarmingUp(true);
+      try {
+        await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: [{ role: "user", content: "hi" }],
+            warmup: true,
+          }),
+        });
+        setIsWarmedUp(true);
+      } catch {
+        // Ignore errors, warmup is best-effort
+      } finally {
+        setIsWarmingUp(false);
+      }
+    };
+
+    warmUp();
+  }, []);
+
+  // Clear chat history
+  const clearChat = useCallback(() => {
+    setMessages([WELCOME_MESSAGE]);
+    localStorage.removeItem(STORAGE_KEY);
+  }, []);
 
   const sendMessage = async (content: string) => {
     if (!content.trim() || isLoading) return;
@@ -147,56 +143,29 @@ export default function CompanionPage() {
         <title>Piano Buddy — Piano Companion</title>
       </Head>
 
-      <main className="min-h-screen bg-gradient-to-b from-stone-50 via-mint-50/30 to-stone-50 flex flex-col">
-        {/* Decorative background elements */}
-        <div className="fixed inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 left-10 w-64 h-64 bg-mint-200/20 rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-10 w-80 h-80 bg-sage-200/20 rounded-full blur-3xl" />
-        </div>
-
-        {/* Header */}
-        <header className="bg-white/70 backdrop-blur-xl border-b border-mint-100 sticky top-0 z-10">
-          <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-stone-400 hover:text-mint-600 transition-colors cursor-pointer"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
+      <PageLayout className="flex flex-col">
+        <Header
+          title="Piano Buddy"
+          subtitle={
+            isWarmingUp
+              ? "Waking up..."
+              : isWarmedUp
+                ? "Online • Ready to help"
+                : "Connecting..."
+          }
+          icon={<span className="text-lg">🎹</span>}
+          rightContent={
+            messages.length > 1 && (
+              <button
+                onClick={clearChat}
+                className="text-xs text-stone-400 hover:text-stone-600 transition-colors px-2 py-1 rounded-lg hover:bg-stone-100 cursor-pointer"
+                title="Clear chat history"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
-                />
-              </svg>
-              <span className="text-sm font-medium">Back</span>
-            </Link>
-
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-mint-400 to-sage-500 flex items-center justify-center shadow-md">
-                  <span className="text-xl">🎹</span>
-                </div>
-                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-mint-400 rounded-full border-2 border-white shadow-sm" />
-              </div>
-              <div>
-                <h1 className="font-display font-semibold text-stone-800">
-                  Piano Buddy
-                </h1>
-                <p className="text-xs text-mint-600 font-medium">
-                  Online • Ready to help
-                </p>
-              </div>
-            </div>
-
-            <div className="w-16" />
-          </div>
-        </header>
+                Clear chat
+              </button>
+            )
+          }
+        />
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto relative z-0">
@@ -204,20 +173,18 @@ export default function CompanionPage() {
             {messages.map((message, index) => (
               <div
                 key={message.id}
-                className={`flex gap-3 ${
-                  message.role === "user" ? "justify-end" : "justify-start"
-                }`}
+                className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 {/* Assistant Avatar */}
                 {message.role === "assistant" && (
                   <div className="flex-shrink-0 mt-1">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-mint-400 to-sage-500 flex items-center justify-center shadow-sm">
+                    <IconAvatar size="sm">
                       <span className="text-sm">🎹</span>
-                    </div>
+                    </IconAvatar>
                   </div>
                 )}
 
-                <div className={`max-w-[80%]`}>
+                <div className="max-w-[80%]">
                   <div
                     className={`px-4 py-3 rounded-2xl shadow-sm ${
                       message.role === "user"
@@ -230,9 +197,7 @@ export default function CompanionPage() {
                     </p>
                   </div>
                   <p
-                    className={`text-[11px] text-stone-400 mt-1.5 px-1 ${
-                      message.role === "user" ? "text-right" : "text-left"
-                    }`}
+                    className={`text-[11px] text-stone-400 mt-1.5 px-1 ${message.role === "user" ? "text-right" : "text-left"}`}
                   >
                     {index === 0
                       ? "Just now"
@@ -270,15 +235,20 @@ export default function CompanionPage() {
             {isLoading && (
               <div className="flex gap-3 justify-start">
                 <div className="flex-shrink-0 mt-1">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-mint-400 to-sage-500 flex items-center justify-center shadow-sm">
+                  <IconAvatar size="sm">
                     <span className="text-sm">🎹</span>
-                  </div>
+                  </IconAvatar>
                 </div>
                 <div className="bg-white px-5 py-4 rounded-2xl rounded-bl-md border border-mint-100 shadow-sm">
-                  <div className="flex gap-1.5">
-                    <span className="w-2 h-2 bg-mint-400 rounded-full animate-bounce" />
-                    <span className="w-2 h-2 bg-mint-400 rounded-full animate-bounce [animation-delay:0.15s]" />
-                    <span className="w-2 h-2 bg-mint-400 rounded-full animate-bounce [animation-delay:0.3s]" />
+                  <div className="flex items-center gap-3">
+                    <div className="flex gap-1.5">
+                      <span className="w-2 h-2 bg-mint-400 rounded-full animate-bounce" />
+                      <span className="w-2 h-2 bg-mint-400 rounded-full animate-bounce [animation-delay:0.15s]" />
+                      <span className="w-2 h-2 bg-mint-400 rounded-full animate-bounce [animation-delay:0.3s]" />
+                    </div>
+                    <span className="text-sm text-stone-400">
+                      {!isWarmedUp ? "Waking up Piano Buddy..." : "Thinking..."}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -310,7 +280,7 @@ export default function CompanionPage() {
                 Quick prompts
               </p>
               <div className="flex flex-wrap gap-2">
-                {quickPrompts.map((qp) => (
+                {QUICK_PROMPTS.map((qp) => (
                   <button
                     key={qp.label}
                     onClick={() => sendMessage(qp.prompt)}
@@ -334,26 +304,23 @@ export default function CompanionPage() {
               }}
               className="flex gap-3"
             >
-              <div className="flex-1 relative">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask me anything about piano..."
-                  disabled={isLoading}
-                  className="w-full px-4 py-3.5 bg-white border border-stone-200 text-stone-800
-                           rounded-2xl focus:outline-none focus:ring-2 focus:ring-mint-300
-                           focus:border-mint-400 transition-all shadow-sm
-                           disabled:opacity-50 placeholder:text-stone-400"
-                />
-              </div>
-              <button
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask me anything about piano..."
+                disabled={isLoading}
+                className="flex-1 px-4 py-3.5 bg-white border border-stone-200 text-stone-800
+                         rounded-2xl focus:outline-none focus:ring-2 focus:ring-mint-300
+                         focus:border-mint-400 transition-all shadow-sm
+                         disabled:opacity-50 placeholder:text-stone-400"
+              />
+              <Button
                 type="submit"
                 disabled={isLoading || !input.trim()}
-                className="px-5 py-3.5 bg-gradient-to-r from-mint-500 to-sage-500 hover:from-mint-600 hover:to-sage-600 
-                         text-white rounded-2xl font-medium transition-all cursor-pointer
-                         disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg
-                         hover:scale-105 active:scale-95"
+                variant="primary"
+                size="md"
+                className="px-5 py-3.5"
               >
                 <svg
                   className="w-5 h-5"
@@ -368,13 +335,13 @@ export default function CompanionPage() {
                     d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
                   />
                 </svg>
-              </button>
+              </Button>
             </form>
 
             {/* Footer with mini piano decoration */}
             <div className="flex items-center justify-center gap-3 mt-4">
               <div className="h-px flex-1 bg-gradient-to-r from-transparent via-mint-200 to-transparent" />
-              <MiniPianoKeys />
+              <MiniPianoDecoration />
               <div className="h-px flex-1 bg-gradient-to-r from-transparent via-mint-200 to-transparent" />
             </div>
             <p className="text-center text-xs text-stone-400 mt-2">
@@ -382,7 +349,7 @@ export default function CompanionPage() {
             </p>
           </div>
         </div>
-      </main>
+      </PageLayout>
     </>
   );
 }

@@ -50,3 +50,5 @@ export {
   type QuickPrompt,
   type Message,
 } from "./companion";
+
+export { CHAT_SYSTEM_PROMPT, PLAYLIST_SYSTEM_PROMPT } from "./prompts";
