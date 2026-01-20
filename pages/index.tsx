@@ -316,9 +316,9 @@ export default function Home() {
           {/* Footer */}
           <footer className="text-center py-8 border-t border-sage-100/50">
             <p className="text-sm text-stone-400">
-              <span className="text-mint-500 animate-pulse">♫</span>
-              Happy Pianing{" "}
-              <span className="text-mint-500 animate-pulse">♫</span>
+              <span className="text-mint-500 animate-pulse mr-1">♫</span> Happy
+              Pianing{" "}
+              <span className="text-mint-500 animate-pulse ml-1">♫</span>
             </p>
           </footer>
         </div>
