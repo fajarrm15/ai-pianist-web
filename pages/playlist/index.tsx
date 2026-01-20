@@ -98,11 +98,31 @@ const YouTubeIcon = () => (
   </svg>
 );
 
+const PencilIcon = () => (
+  <svg
+    className="w-4 h-4"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+    />
+  </svg>
+);
+
 export default function PlaylistPage() {
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [selectedSituation, setSelectedSituation] = useState<string | null>(
     null,
   );
+  const [customMood, setCustomMood] = useState("");
+  const [customSituation, setCustomSituation] = useState("");
+  const [showCustomMood, setShowCustomMood] = useState(false);
+  const [showCustomSituation, setShowCustomSituation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<PlaylistResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -126,8 +146,25 @@ export default function PlaylistPage() {
     warmUp();
   }, []);
 
+  // Get the final mood value (custom or selected)
+  const getFinalMood = () => {
+    if (showCustomMood && customMood.trim()) {
+      return customMood.trim();
+    }
+    return selectedMood;
+  };
+
+  // Get the final situation value (custom or selected)
+  const getFinalSituation = () => {
+    if (showCustomSituation && customSituation.trim()) {
+      return customSituation.trim();
+    }
+    return selectedSituation;
+  };
+
   const generatePlaylist = async () => {
-    if (!selectedMood) return;
+    const finalMood = getFinalMood();
+    if (!finalMood) return;
 
     setIsLoading(true);
     setError(null);
@@ -137,8 +174,8 @@ export default function PlaylistPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          mood: selectedMood,
-          situation: selectedSituation,
+          mood: finalMood,
+          situation: getFinalSituation(),
         }),
       });
 
@@ -156,11 +193,34 @@ export default function PlaylistPage() {
   const reset = () => {
     setSelectedMood(null);
     setSelectedSituation(null);
+    setCustomMood("");
+    setCustomSituation("");
+    setShowCustomMood(false);
+    setShowCustomSituation(false);
     setResult(null);
     setError(null);
   };
 
   const getMoodData = (id: string): Mood | undefined => getMoodById(id);
+
+  // Check if we can generate (either selected mood or valid custom mood)
+  const canGenerate = getFinalMood() !== null && getFinalMood() !== "";
+
+  // Get display mood for results
+  const getDisplayMood = () => {
+    if (result?.mood) {
+      const moodData = getMoodById(result.mood);
+      if (moodData) {
+        return { label: moodData.label, emoji: moodData.emoji };
+      }
+      // Custom mood - capitalize first letter
+      return {
+        label: result.mood.charAt(0).toUpperCase() + result.mood.slice(1),
+        emoji: "✨",
+      };
+    }
+    return { label: "Your", emoji: "🎵" };
+  };
 
   return (
     <>
@@ -181,12 +241,10 @@ export default function PlaylistPage() {
             <div className="space-y-6 animate-fade-in">
               <div className="text-center">
                 <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-mint-100 to-sage-100 mb-4 shadow-sm">
-                  <span className="text-4xl">
-                    {getMoodData(result.mood)?.emoji}
-                  </span>
+                  <span className="text-4xl">{getDisplayMood().emoji}</span>
                 </div>
                 <h2 className="font-display text-2xl font-semibold text-stone-800 mb-2">
-                  Your {getMoodData(result.mood)?.label} Playlist
+                  Your {getDisplayMood().label} Playlist
                 </h2>
                 <p className="text-stone-500">{result.intro}</p>
               </div>
@@ -254,65 +312,147 @@ export default function PlaylistPage() {
                 </p>
               </div>
 
-              {/* Mood Grid */}
+              {/* Mood Section */}
               <div>
                 <SectionLabel icon={<HeartIcon />}>
                   Choose your mood
                 </SectionLabel>
-                <div className="grid grid-cols-4 gap-3">
-                  {MOODS.map((mood) => (
+
+                {!showCustomMood ? (
+                  <>
+                    <div className="grid grid-cols-4 gap-3">
+                      {MOODS.map((mood) => (
+                        <button
+                          key={mood.id}
+                          onClick={() => setSelectedMood(mood.id)}
+                          className={`
+                            p-4 rounded-2xl border-2 transition-all text-center cursor-pointer
+                            bg-gradient-to-br ${mood.bg}
+                            ${
+                              selectedMood === mood.id
+                                ? "border-mint-400 shadow-md scale-[1.02] ring-2 ring-mint-200"
+                                : "border-transparent hover:border-mint-200 hover:shadow-sm"
+                            }
+                          `}
+                        >
+                          <span className="text-2xl block mb-1">
+                            {mood.emoji}
+                          </span>
+                          <span className="text-xs font-medium text-stone-700">
+                            {mood.label}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Custom mood toggle */}
                     <button
-                      key={mood.id}
-                      onClick={() => setSelectedMood(mood.id)}
-                      className={`
-                        p-4 rounded-2xl border-2 transition-all text-center cursor-pointer
-                        bg-gradient-to-br ${mood.bg}
-                        ${
-                          selectedMood === mood.id
-                            ? "border-mint-400 shadow-md scale-[1.02] ring-2 ring-mint-200"
-                            : "border-transparent hover:border-mint-200 hover:shadow-sm"
-                        }
-                      `}
+                      onClick={() => {
+                        setShowCustomMood(true);
+                        setSelectedMood(null);
+                      }}
+                      className="flex items-center gap-2 mx-auto mt-4 text-sm text-stone-400 hover:text-mint-600 transition-colors cursor-pointer"
                     >
-                      <span className="text-2xl block mb-1">{mood.emoji}</span>
-                      <span className="text-xs font-medium text-stone-700">
-                        {mood.label}
-                      </span>
+                      <PencilIcon />
+                      Or describe your own mood
                     </button>
-                  ))}
-                </div>
+                  </>
+                ) : (
+                  <div className="space-y-3">
+                    <input
+                      type="text"
+                      value={customMood}
+                      onChange={(e) => setCustomMood(e.target.value)}
+                      placeholder="e.g., nostalgic, adventurous, bittersweet..."
+                      className="w-full px-4 py-3 bg-white border border-stone-200 text-stone-800
+                               rounded-xl focus:outline-none focus:ring-2 focus:ring-mint-300
+                               focus:border-mint-400 transition-all shadow-sm
+                               placeholder:text-stone-400"
+                      autoFocus
+                    />
+                    <button
+                      onClick={() => {
+                        setShowCustomMood(false);
+                        setCustomMood("");
+                      }}
+                      className="flex items-center gap-2 mx-auto text-sm text-stone-400 hover:text-mint-600 transition-colors cursor-pointer"
+                    >
+                      ← Back to mood selection
+                    </button>
+                  </div>
+                )}
               </div>
 
-              {/* Situation Tags */}
+              {/* Situation Section */}
               <div>
                 <SectionLabel icon={<ClockIcon />}>
                   What are you doing?{" "}
                   <span className="text-stone-400 font-normal">(optional)</span>
                 </SectionLabel>
-                <div className="flex flex-wrap gap-2">
-                  {SITUATIONS.map((situation) => (
+
+                {!showCustomSituation ? (
+                  <>
+                    <div className="flex flex-wrap gap-2">
+                      {SITUATIONS.map((situation) => (
+                        <button
+                          key={situation.id}
+                          onClick={() =>
+                            setSelectedSituation(
+                              selectedSituation === situation.id
+                                ? null
+                                : situation.id,
+                            )
+                          }
+                          className={`
+                            px-4 py-2.5 rounded-xl text-sm transition-all cursor-pointer
+                            ${
+                              selectedSituation === situation.id
+                                ? "bg-gradient-to-r from-mint-500 to-sage-500 text-white shadow-md"
+                                : "bg-white text-stone-600 border border-mint-100 hover:border-mint-300 hover:bg-mint-50"
+                            }
+                          `}
+                        >
+                          {situation.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Custom situation toggle */}
                     <button
-                      key={situation.id}
-                      onClick={() =>
-                        setSelectedSituation(
-                          selectedSituation === situation.id
-                            ? null
-                            : situation.id,
-                        )
-                      }
-                      className={`
-                        px-4 py-2.5 rounded-xl text-sm transition-all cursor-pointer
-                        ${
-                          selectedSituation === situation.id
-                            ? "bg-gradient-to-r from-mint-500 to-sage-500 text-white shadow-md"
-                            : "bg-white text-stone-600 border border-mint-100 hover:border-mint-300 hover:bg-mint-50"
-                        }
-                      `}
+                      onClick={() => {
+                        setShowCustomSituation(true);
+                        setSelectedSituation(null);
+                      }}
+                      className="flex items-center gap-2 mx-auto mt-4 text-sm text-stone-400 hover:text-mint-600 transition-colors cursor-pointer"
                     >
-                      {situation.label}
+                      <PencilIcon />
+                      Or describe your situation
                     </button>
-                  ))}
-                </div>
+                  </>
+                ) : (
+                  <div className="space-y-3">
+                    <input
+                      type="text"
+                      value={customSituation}
+                      onChange={(e) => setCustomSituation(e.target.value)}
+                      placeholder="e.g., coding late at night, rainy afternoon, morning coffee..."
+                      className="w-full px-4 py-3 bg-white border border-stone-200 text-stone-800
+                               rounded-xl focus:outline-none focus:ring-2 focus:ring-mint-300
+                               focus:border-mint-400 transition-all shadow-sm
+                               placeholder:text-stone-400"
+                      autoFocus
+                    />
+                    <button
+                      onClick={() => {
+                        setShowCustomSituation(false);
+                        setCustomSituation("");
+                      }}
+                      className="flex items-center gap-2 mx-auto text-sm text-stone-400 hover:text-mint-600 transition-colors cursor-pointer"
+                    >
+                      ← Back to situation selection
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Error */}
@@ -326,7 +466,7 @@ export default function PlaylistPage() {
               <div className="text-center pt-4">
                 <Button
                   onClick={generatePlaylist}
-                  disabled={!selectedMood || isLoading}
+                  disabled={!canGenerate || isLoading}
                   variant="primary"
                   size="lg"
                 >
@@ -343,15 +483,17 @@ export default function PlaylistPage() {
                   )}
                 </Button>
 
-                <button
-                  onClick={() => setSelectedMood(getRandomMood().id)}
-                  disabled={isLoading}
-                  className="flex items-center gap-2 mx-auto mt-4 text-sm text-stone-400 hover:text-mint-600 
-                           transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
-                >
-                  <RefreshIcon />
-                  Surprise me
-                </button>
+                {!showCustomMood && (
+                  <button
+                    onClick={() => setSelectedMood(getRandomMood().id)}
+                    disabled={isLoading}
+                    className="flex items-center gap-2 mx-auto mt-4 text-sm text-stone-400 hover:text-mint-600 
+                             transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                  >
+                    <RefreshIcon />
+                    Surprise me
+                  </button>
+                )}
               </div>
             </div>
           )}

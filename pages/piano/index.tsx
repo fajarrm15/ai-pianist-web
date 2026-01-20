@@ -46,6 +46,7 @@ export default function PianoPage() {
   const [stats, setStats] = useState(initialGameStats);
   const [hitEffects, setHitEffects] = useState<HitEffect[]>([]);
   const [screenShake, setScreenShake] = useState(false);
+  const [showBirthdayPopup, setShowBirthdayPopup] = useState(false);
 
   // Timing refs
   const gameStartTime = useRef(0);
@@ -268,8 +269,12 @@ export default function PianoPage() {
       // Check if song ended
       const lastNoteTime = Math.max(...selectedSong.notes.map((n) => n.time));
       if (elapsed > lastNoteTime + FALL_DURATION + 1000) {
-        setGameState("ended");
-        return;
+        if (selectedSong?.id === "happy-birthday") {
+          setShowBirthdayPopup(true);
+        } else {
+          setGameState("ended");
+          return;
+        }
       }
 
       // Force re-render for smooth animation
@@ -1087,6 +1092,14 @@ export default function PianoPage() {
           )}
         </div>
       </main>
+      {showBirthdayPopup && (
+        <BirthdayPopup
+          onClose={() => {
+            setShowBirthdayPopup(false);
+            setGameState("ended");
+          }}
+        />
+      )}
     </>
   );
 }
@@ -1216,73 +1229,6 @@ function PianoKeyboard({
   );
 }
 
-// ============== MINI PIANO ==============
-function MiniPiano({
-  activeKeys,
-  flashKeys,
-  onKeyPress,
-}: {
-  activeKeys: Set<string>;
-  flashKeys: Set<string>;
-  onKeyPress: (note: string) => void;
-}) {
-  const whiteKeys = PIANO_KEYS.filter((k) => k.type === "white");
-  const blackKeys = PIANO_KEYS.filter((k) => k.type === "black");
-
-  const getBlackKeyPos = (note: string, octave: number) => {
-    const w = 100 / whiteKeys.length;
-    let idx = 0;
-    for (const k of PIANO_KEYS) {
-      if (k.fullNote === `${note}${octave}`) break;
-      if (k.type === "white") idx++;
-    }
-    return `${idx * w - w * 0.3}%`;
-  };
-
-  return (
-    <div className="relative h-20">
-      <div className="relative flex h-full">
-        {whiteKeys.map((key) => (
-          <button
-            key={key.fullNote}
-            onMouseDown={() => onKeyPress(key.fullNote)}
-            onTouchStart={(e) => {
-              e.preventDefault();
-              onKeyPress(key.fullNote);
-            }}
-            className={`relative flex-1 mx-px rounded-b-lg flex items-end justify-center pb-1 transition-all border border-stone-600
-              ${flashKeys.has(key.fullNote) ? "scale-[0.97]" : ""}
-              ${activeKeys.has(key.fullNote) ? "bg-mint-300 border-mint-400" : "bg-stone-200 hover:bg-white"}`}
-          >
-            <span className="text-[9px] text-stone-500 font-medium uppercase">
-              {key.keyboardKey}
-            </span>
-          </button>
-        ))}
-      </div>
-      <div className="absolute top-0 left-0 right-0 h-12 pointer-events-none">
-        {blackKeys.map((key) => (
-          <button
-            key={key.fullNote}
-            onMouseDown={() => onKeyPress(key.fullNote)}
-            onTouchStart={(e) => {
-              e.preventDefault();
-              onKeyPress(key.fullNote);
-            }}
-            style={{
-              left: getBlackKeyPos(key.note, key.octave),
-              width: `${50 / whiteKeys.length}%`,
-            }}
-            className={`absolute h-full rounded-b-md pointer-events-auto transition-all
-              ${flashKeys.has(key.fullNote) ? "scale-[0.97]" : ""}
-              ${activeKeys.has(key.fullNote) ? "bg-stone-400" : "bg-stone-900 hover:bg-stone-700"}`}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 // ============== GAME PIANO - Larger with glow effects ==============
 function GamePiano({
   activeKeys,
@@ -1378,16 +1324,178 @@ function GamePiano({
                   ? "0 0 25px rgba(99, 102, 241, 0.9)"
                   : "0 4px 8px rgba(0, 0, 0, 0.4)",
               }}
-              className={`absolute h-full rounded-b-lg pointer-events-auto transition-all
+              className={`absolute h-full rounded-b-lg pointer-events-auto transition-all flex items-end justify-center pb-2
                 ${isFlashing ? "scale-[0.98]" : ""}
                 ${
                   isActive
                     ? "bg-gradient-to-b from-indigo-400 to-indigo-600"
                     : "bg-gradient-to-b from-stone-800 to-stone-950 hover:from-stone-700"
                 }`}
-            />
+            >
+              <span className="text-[10px] text-stone-300 font-medium uppercase">
+                {key.keyboardKey}
+              </span>
+            </button>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+// ============== BIRTHDAY POPUP COMPONENT ==============
+
+function BirthdayPopup({ onClose }: { onClose: () => void }) {
+  const [showConfetti, setShowConfetti] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowConfetti(false), 4000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const CONFETTI_PIECES = [
+    { id: 0, left: 5, delay: 0.2, duration: 3.5, color: "#86efac" }, // mint
+    { id: 1, left: 12, delay: 0.8, duration: 4.2, color: "#a7f3d0" }, // light mint
+    { id: 2, left: 18, delay: 0.1, duration: 3.8, color: "#6ee7b7" }, // sage
+    { id: 3, left: 25, delay: 1.2, duration: 4.5, color: "#d1d5db" }, // stone
+    { id: 4, left: 32, delay: 0.5, duration: 3.2, color: "#86efac" },
+    { id: 5, left: 38, delay: 1.8, duration: 4.8, color: "#a7f3d0" },
+    { id: 6, left: 45, delay: 0.3, duration: 3.6, color: "#6ee7b7" },
+    { id: 7, left: 52, delay: 1.5, duration: 4.1, color: "#d1d5db" },
+    { id: 8, left: 58, delay: 0.7, duration: 3.9, color: "#86efac" },
+    { id: 9, left: 65, delay: 1.1, duration: 4.4, color: "#a7f3d0" },
+    { id: 10, left: 72, delay: 0.4, duration: 3.3, color: "#6ee7b7" },
+    { id: 11, left: 78, delay: 1.6, duration: 4.7, color: "#d1d5db" },
+    { id: 12, left: 85, delay: 0.9, duration: 3.7, color: "#86efac" },
+    { id: 13, left: 92, delay: 1.3, duration: 4.3, color: "#a7f3d0" },
+    { id: 14, left: 8, delay: 0.6, duration: 4.0, color: "#6ee7b7" },
+    { id: 15, left: 15, delay: 1.9, duration: 3.4, color: "#d1d5db" },
+    { id: 16, left: 22, delay: 0.2, duration: 4.6, color: "#86efac" },
+    { id: 17, left: 28, delay: 1.4, duration: 3.1, color: "#a7f3d0" },
+    { id: 18, left: 35, delay: 0.8, duration: 4.9, color: "#6ee7b7" },
+    { id: 19, left: 42, delay: 1.7, duration: 3.5, color: "#d1d5db" },
+    { id: 20, left: 48, delay: 0.3, duration: 4.2, color: "#86efac" },
+    { id: 21, left: 55, delay: 1.0, duration: 3.8, color: "#a7f3d0" },
+    { id: 22, left: 62, delay: 0.5, duration: 4.5, color: "#6ee7b7" },
+    { id: 23, left: 68, delay: 1.2, duration: 3.2, color: "#d1d5db" },
+    { id: 24, left: 75, delay: 0.7, duration: 4.8, color: "#86efac" },
+    { id: 25, left: 82, delay: 1.5, duration: 3.6, color: "#a7f3d0" },
+    { id: 26, left: 88, delay: 0.1, duration: 4.1, color: "#6ee7b7" },
+    { id: 27, left: 95, delay: 1.8, duration: 3.9, color: "#d1d5db" },
+    { id: 28, left: 3, delay: 0.4, duration: 4.4, color: "#86efac" },
+    { id: 29, left: 10, delay: 1.6, duration: 3.3, color: "#a7f3d0" },
+  ];
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+      {/* Confetti Effect - Music notes style */}
+      {showConfetti && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {CONFETTI_PIECES.map((piece) => (
+            <div
+              key={piece.id}
+              className="absolute animate-confetti text-xl"
+              style={{
+                left: `${piece.left}%`,
+                top: `-20px`,
+                animationDelay: `${piece.delay}s`,
+                animationDuration: `${piece.duration}s`,
+                color: piece.color,
+              }}
+            >
+              {piece.id % 3 === 0 ? "♪" : piece.id % 3 === 1 ? "♫" : "♬"}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Popup Card */}
+      <div className="bg-white rounded-3xl p-8 max-w-md mx-4 text-center shadow-2xl animate-bounce-in relative overflow-hidden border border-mint-100">
+        {/* Subtle gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-mint-50/50 via-transparent to-sage-50/50 pointer-events-none" />
+
+        {/* Decorative corners */}
+        <div className="absolute top-3 left-3 text-mint-300 opacity-40">
+          <svg
+            className="w-8 h-8"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+            />
+          </svg>
+        </div>
+        <div className="absolute top-3 right-3 text-sage-300 opacity-40">
+          <svg
+            className="w-8 h-8"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+            />
+          </svg>
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10">
+          {/* Icon */}
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-mint-400 to-sage-500 flex items-center justify-center shadow-lg">
+            <span className="text-3xl">🎂</span>
+          </div>
+
+          {/* Message */}
+          <h2 className="font-display text-2xl font-semibold text-stone-800 mb-2">
+            Happy Birthday!
+          </h2>
+
+          <p className="text-stone-500 mb-4">
+            Wishing you a wonderful day filled with joy and beautiful melodies
+          </p>
+
+          {/* Decorative line with notes */}
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-mint-200 to-transparent" />
+            <span className="text-mint-400 text-sm">♪ ♫ ♪</span>
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-mint-200 to-transparent" />
+          </div>
+
+          <p className="text-stone-400 text-sm mb-6 italic">
+            May your year be filled with beautiful things, good health, and all
+            the happiness you deserved!!!
+          </p>
+          <p className="text-stone-400 text-sm mb-6 italic">
+            I hope you&apos;ll achieve everything that you ever desired, Wishing
+            you nothing but the best always
+          </p>
+
+          {/* Decorative line with notes */}
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-mint-200 to-transparent" />
+            <span className="text-mint-400 text-sm">♪ ♫ ♪</span>
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-mint-200 to-transparent" />
+          </div>
+
+          {/* Continue Button */}
+          <button
+            onClick={onClose}
+            className="px-8 py-3 bg-gradient-to-r from-mint-500 to-sage-500 
+                       text-white font-medium rounded-xl shadow-md
+                       hover:shadow-lg hover:scale-[1.02] transition-all
+                       cursor-pointer"
+          >
+            Continue
+          </button>
+        </div>
       </div>
     </div>
   );
