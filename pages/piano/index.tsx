@@ -552,13 +552,13 @@ export default function PianoPage() {
 
         {/* Header */}
         <header className="bg-white/70 backdrop-blur-xl border-b border-mint-100 sticky top-0 z-10">
-          <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="max-w-5xl mx-auto px-3 md:px-4 py-2 md:py-3 flex items-center justify-between">
             <Link
               href="/"
-              className="flex items-center gap-2 text-stone-400 hover:text-mint-600 transition-colors cursor-pointer"
+              className="flex items-center gap-1 md:gap-2 text-stone-400 hover:text-mint-600 transition-colors cursor-pointer"
             >
               <svg
-                className="w-5 h-5"
+                className="w-4 h-4 md:w-5 md:h-5"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -570,25 +570,25 @@ export default function PianoPage() {
                   d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
                 />
               </svg>
-              <span className="text-sm font-medium">Back</span>
+              <span className="text-xs md:text-sm font-medium">Back</span>
             </Link>
 
-            {/* Mode Toggle */}
-            <div className="flex items-center gap-2 bg-mint-50 border border-mint-200 p-1.5 rounded-2xl">
+            {/* Mode Toggle - Compact on mobile */}
+            <div className="flex items-center gap-1 md:gap-2 bg-mint-50 border border-mint-200 p-1 md:p-1.5 rounded-xl md:rounded-2xl">
               <button
                 onClick={() => {
                   setMode("freeplay");
                   resetGame();
                   setSelectedSong(null);
                 }}
-                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl transition-all cursor-pointer ${
+                className={`flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-lg md:rounded-xl transition-all cursor-pointer ${
                   mode === "freeplay"
                     ? "bg-white text-stone-800 shadow-sm border border-mint-200"
                     : "text-stone-500 hover:text-stone-700 hover:bg-white/50"
                 }`}
               >
                 <svg
-                  className="w-4 h-4"
+                  className="w-3 h-3 md:w-4 md:h-4"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -600,21 +600,22 @@ export default function PianoPage() {
                     d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
                   />
                 </svg>
-                Free Play
+                <span className="hidden sm:inline">Free Play</span>
+                <span className="sm:hidden">Play</span>
               </button>
               <button
                 onClick={() => {
                   setMode("game");
                   resetGame();
                 }}
-                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl transition-all cursor-pointer ${
+                className={`flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-lg md:rounded-xl transition-all cursor-pointer ${
                   mode === "game"
                     ? "bg-white text-stone-800 shadow-sm border border-mint-200"
                     : "text-stone-500 hover:text-stone-700 hover:bg-white/50"
                 }`}
               >
                 <svg
-                  className="w-4 h-4"
+                  className="w-3 h-3 md:w-4 md:h-4"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -631,11 +632,13 @@ export default function PianoPage() {
                     d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                Game Mode
+                <span className="hidden sm:inline">Game Mode</span>
+                <span className="sm:hidden">Game</span>
               </button>
             </div>
 
-            <div className="w-20" />
+            {/* Spacer / Volume button placeholder */}
+            <div className="w-8 md:w-20" />
           </div>
         </header>
 
@@ -643,25 +646,25 @@ export default function PianoPage() {
         <div className="flex-1 flex flex-col relative z-0">
           {mode === "freeplay" ? (
             // ============== FREE PLAY MODE ==============
-            <div className="flex-1 flex flex-col items-center justify-center p-6">
+            <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-6 overflow-hidden">
               {/* Title Section */}
-              <div className="text-center mb-8">
+              <div className="text-center mb-4 md:mb-8">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-mint-100 rounded-full mb-4">
                   <div className="w-2 h-2 rounded-full bg-mint-500 animate-pulse" />
                   <span className="text-sm font-medium text-mint-700">
                     Free Play Mode
                   </span>
                 </div>
-                <h1 className="font-display text-2xl font-semibold text-stone-800 mb-2">
+                <h1 className="font-display text-xl md:text-2xl font-semibold text-stone-800 mb-2">
                   Play the Piano
                 </h1>
-                <p className="text-stone-500">
+                <p className="text-stone-500 text-sm md:text-base">
                   Click the keys or use your keyboard to play
                 </p>
               </div>
 
-              {/* Keyboard hints */}
-              <div className="flex items-center gap-6 mb-6">
+              {/* Keyboard hints - Hidden on mobile, shown on desktop */}
+              <div className="hidden md:flex items-center gap-6 mb-6">
                 <div className="flex items-center gap-2 text-sm">
                   <span className="text-stone-400">White keys:</span>
                   <div className="flex gap-1">
@@ -692,17 +695,25 @@ export default function PianoPage() {
                 </div>
               </div>
 
-              <PianoKeyboard
-                isLoaded={isLoaded}
-                loadingProgress={loadingProgress}
-                activeKeys={activeKeys}
-                flashKeys={keyFlash}
-                onKeyDown={playNote}
-                onKeyUp={stopNote}
-              />
+              {/* Mobile keyboard hint - Simple version */}
+              <p className="md:hidden text-xs text-stone-400 mb-4">
+                Use keyboard keys A-L for white, W-P for black
+              </p>
 
-              {/* Tips */}
-              <div className="mt-8 flex items-center gap-6 text-sm text-stone-400">
+              {/* Piano - with responsive wrapper */}
+              <div className="w-full max-w-4xl px-2 md:px-0">
+                <PianoKeyboard
+                  isLoaded={isLoaded}
+                  loadingProgress={loadingProgress}
+                  activeKeys={activeKeys}
+                  flashKeys={keyFlash}
+                  onKeyDown={playNote}
+                  onKeyUp={stopNote}
+                />
+              </div>
+
+              {/* Tips - Stack on mobile, row on desktop */}
+              <div className="mt-4 md:mt-8 flex flex-col md:flex-row items-center gap-3 md:gap-6 text-sm text-stone-400">
                 <div className="flex items-center gap-2">
                   <svg
                     className="w-4 h-4 text-mint-500"
@@ -1134,13 +1145,13 @@ function PianoKeyboard({
   };
 
   return (
-    <div className="w-full max-w-4xl">
+    <div className="w-full">
       <div
-        className="relative bg-stone-800 p-3 pb-4 rounded-3xl shadow-xl border border-stone-700"
-        style={{ minHeight: "260px" }}
+        className="relative bg-stone-800 p-2 md:p-3 pb-3 md:pb-4 rounded-2xl md:rounded-3xl shadow-xl border border-stone-700"
+        style={{ minHeight: "180px" }}
       >
         {!isLoaded && (
-          <div className="absolute inset-0 bg-stone-800/95 rounded-3xl flex flex-col items-center justify-center z-20">
+          <div className="absolute inset-0 bg-stone-800/95 rounded-2xl md:rounded-3xl flex flex-col items-center justify-center z-20">
             <div className="w-8 h-8 border-2 border-mint-400 border-t-transparent rounded-full animate-spin mb-4" />
             <p className="text-stone-400 text-sm mb-3">Loading piano...</p>
             <div className="w-48 h-1.5 bg-stone-700 rounded-full overflow-hidden">
@@ -1152,7 +1163,8 @@ function PianoKeyboard({
           </div>
         )}
 
-        <div className="relative flex h-52">
+        {/* White keys */}
+        <div className="relative flex h-36 md:h-52">
           {whiteKeys.map((key) => (
             <button
               key={key.fullNote}
@@ -1170,7 +1182,7 @@ function PianoKeyboard({
                 onKeyUp(key.fullNote);
               }}
               disabled={!isLoaded}
-              className={`relative flex-1 mx-0.5 rounded-b-xl flex flex-col justify-end items-center pb-3 border border-stone-200
+              className={`relative flex-1 mx-px md:mx-0.5 rounded-b-lg md:rounded-b-xl flex flex-col justify-end items-center pb-2 md:pb-3 border border-stone-200
                 ${flashKeys.has(key.fullNote) ? "scale-[0.98]" : ""}
                 ${
                   activeKeys.has(key.fullNote)
@@ -1178,14 +1190,15 @@ function PianoKeyboard({
                     : "bg-gradient-to-b from-white to-stone-100 shadow-key hover:from-stone-50"
                 } transition-all disabled:cursor-not-allowed`}
             >
-              <span className="text-[10px] text-stone-500 font-medium uppercase">
+              <span className="text-[8px] md:text-[10px] text-stone-500 font-medium uppercase">
                 {key.keyboardKey}
               </span>
             </button>
           ))}
         </div>
 
-        <div className="absolute top-3 left-3 right-3 h-32 pointer-events-none">
+        {/* Black keys */}
+        <div className="absolute top-2 md:top-3 left-2 md:left-3 right-2 md:right-3 h-20 md:h-32 pointer-events-none">
           {blackKeys.map((key) => (
             <button
               key={key.fullNote}
@@ -1207,7 +1220,7 @@ function PianoKeyboard({
                 left: getBlackKeyPos(key.note, key.octave),
                 width: `${60 / whiteKeys.length}%`,
               }}
-              className={`absolute h-full rounded-b-lg pointer-events-auto flex flex-col justify-end items-center pb-2
+              className={`absolute h-full rounded-b-md md:rounded-b-lg pointer-events-auto flex flex-col justify-end items-center pb-1 md:pb-2
                 ${flashKeys.has(key.fullNote) ? "scale-[0.98]" : ""}
                 ${
                   activeKeys.has(key.fullNote)
@@ -1215,14 +1228,14 @@ function PianoKeyboard({
                     : "bg-gradient-to-b from-stone-700 to-stone-900 shadow-key hover:from-stone-600"
                 } transition-all disabled:cursor-not-allowed`}
             >
-              <span className="text-[10px] text-stone-400 font-medium uppercase">
+              <span className="text-[7px] md:text-[10px] text-stone-300 font-medium uppercase">
                 {key.keyboardKey}
               </span>
             </button>
           ))}
         </div>
       </div>
-      <p className="text-center text-stone-400 text-xs mt-3">
+      <p className="text-center text-stone-400 text-xs mt-2 md:mt-3">
         Salamander Grand Piano
       </p>
     </div>

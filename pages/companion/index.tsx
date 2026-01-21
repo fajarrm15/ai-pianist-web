@@ -18,6 +18,8 @@ export default function CompanionPage() {
   const [isWarmedUp, setIsWarmedUp] = useState(false);
   const [isWarmingUp, setIsWarmingUp] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [streamingContent, setStreamingContent] = useState("");
+  const [isStreaming, setIsStreaming] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -53,7 +55,7 @@ export default function CompanionPage() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, streamingContent]);
 
   // Pre-warm the LLM when page loads
   useEffect(() => {
@@ -97,6 +99,8 @@ export default function CompanionPage() {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
+    setIsStreaming(true);
+    setStreamingContent("");
 
     try {
       const response = await fetch("/api/chat", {
@@ -112,16 +116,67 @@ export default function CompanionPage() {
 
       if (!response.ok) throw new Error("Failed to get response");
 
-      const data = await response.json();
+      // Check if streaming response
+      const contentType = response.headers.get("content-type");
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          content: data.message,
-        },
-      ]);
+      if (contentType?.includes("text/event-stream")) {
+        // Handle streaming response
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let fullContent = "";
+
+        if (!reader) throw new Error("No response body");
+
+        while (true) {
+          const { done, value } = await reader.read();
+
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split("\n");
+
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              const data = line.slice(6);
+
+              if (data === "[DONE]") {
+                break;
+              }
+
+              try {
+                const parsed = JSON.parse(data);
+                if (parsed.content) {
+                  fullContent += parsed.content;
+                  setStreamingContent(fullContent);
+                }
+              } catch {
+                // Skip invalid JSON
+              }
+            }
+          }
+        }
+
+        // Add the complete message
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: fullContent,
+          },
+        ]);
+      } else {
+        // Handle non-streaming response (fallback)
+        const data = await response.json();
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: data.message,
+          },
+        ]);
+      }
     } catch (error) {
       console.error("Error:", error);
       setMessages((prev) => [
@@ -134,6 +189,8 @@ export default function CompanionPage() {
       ]);
     } finally {
       setIsLoading(false);
+      setIsStreaming(false);
+      setStreamingContent("");
     }
   };
 
@@ -231,8 +288,27 @@ export default function CompanionPage() {
               </div>
             ))}
 
-            {/* Loading indicator */}
-            {isLoading && (
+            {/* Streaming message */}
+            {isStreaming && streamingContent && (
+              <div className="flex gap-3 justify-start">
+                <div className="flex-shrink-0 mt-1">
+                  <IconAvatar size="sm">
+                    <span className="text-sm">🎹</span>
+                  </IconAvatar>
+                </div>
+                <div className="max-w-[80%]">
+                  <div className="bg-white px-4 py-3 rounded-2xl rounded-bl-md border border-mint-100 shadow-sm">
+                    <p className="whitespace-pre-wrap leading-relaxed text-[15px] text-stone-700">
+                      {streamingContent}
+                      <span className="inline-block w-2 h-4 bg-mint-400 ml-1 animate-pulse" />
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Loading indicator (only show when not yet streaming) */}
+            {isLoading && !streamingContent && (
               <div className="flex gap-3 justify-start">
                 <div className="flex-shrink-0 mt-1">
                   <IconAvatar size="sm">
