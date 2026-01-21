@@ -1268,7 +1268,8 @@ function GamePiano({
   };
 
   return (
-    <div className="relative h-28">
+    <div className="relative h-32 md:h-36 select-none">
+      {/* White Keys */}
       <div className="relative flex h-full">
         {whiteKeys.map((key) => {
           const isActive = activeKeys.has(key.fullNote);
@@ -1287,32 +1288,39 @@ function GamePiano({
                 e.preventDefault();
                 onKeyRelease(key.fullNote);
               }}
-              className={`relative flex-1 mx-px rounded-b-lg flex items-end justify-center pb-2 transition-all
-                ${isFlashing ? "scale-[0.98]" : ""}
+              className={`
+                relative flex-1 mx-[1px] md:mx-[2px] rounded-b-lg md:rounded-b-xl 
+                flex flex-col items-center justify-end pb-2 md:pb-3
+                transition-all duration-75 cursor-pointer
+                ${isFlashing ? "scale-[0.97]" : ""}
                 ${
                   isActive
-                    ? "bg-gradient-to-b from-sky-300 to-blue-400"
-                    : "bg-gradient-to-b from-stone-100 to-stone-200 hover:from-white"
-                }`}
-              style={
-                isActive
-                  ? {
-                      boxShadow:
-                        "0 0 25px rgba(56, 189, 248, 0.9), inset 0 0 15px rgba(56, 189, 248, 0.4)",
-                    }
-                  : {
-                      boxShadow: "inset 0 -4px 8px rgba(0, 0, 0, 0.1)",
-                    }
-              }
+                    ? "bg-gradient-to-b from-emerald-300 via-emerald-400 to-emerald-500"
+                    : "bg-gradient-to-b from-white via-stone-50 to-stone-100 hover:from-stone-50"
+                }
+              `}
+              style={{
+                boxShadow: isActive
+                  ? "0 0 20px rgba(52, 211, 153, 0.8), 0 0 40px rgba(52, 211, 153, 0.4), inset 0 0 10px rgba(255, 255, 255, 0.5)"
+                  : "inset 0 -3px 6px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.1)",
+              }}
             >
-              <span className="text-xs text-stone-500 font-medium uppercase">
+              {/* Key letter indicator */}
+              <span
+                className={`
+                text-[10px] md:text-xs font-semibold uppercase tracking-wide
+                ${isActive ? "text-white drop-shadow-sm" : "text-stone-400"}
+              `}
+              >
                 {key.keyboardKey}
               </span>
             </button>
           );
         })}
       </div>
-      <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none">
+
+      {/* Black Keys */}
+      <div className="absolute top-0 left-0 right-0 h-[60%] md:h-[65%] pointer-events-none">
         {blackKeys.map((key) => {
           const isActive = activeKeys.has(key.fullNote);
           const isFlashing = flashKeys.has(key.fullNote);
@@ -1332,26 +1340,39 @@ function GamePiano({
               }}
               style={{
                 left: getBlackKeyPos(key.note, key.octave),
-                width: `${55 / whiteKeys.length}%`,
+                width: `${58 / whiteKeys.length}%`,
                 boxShadow: isActive
-                  ? "0 0 25px rgba(99, 102, 241, 0.9)"
-                  : "0 4px 8px rgba(0, 0, 0, 0.4)",
+                  ? "0 0 20px rgba(99, 102, 241, 0.9), 0 0 40px rgba(99, 102, 241, 0.5)"
+                  : "0 4px 8px rgba(0, 0, 0, 0.5), inset 0 -2px 4px rgba(0, 0, 0, 0.3)",
               }}
-              className={`absolute h-full rounded-b-lg pointer-events-auto transition-all flex items-end justify-center pb-2
-                ${isFlashing ? "scale-[0.98]" : ""}
+              className={`
+                absolute h-full rounded-b-md md:rounded-b-lg pointer-events-auto 
+                flex flex-col items-center justify-end pb-1 md:pb-2
+                transition-all duration-75 cursor-pointer
+                ${isFlashing ? "scale-[0.97]" : ""}
                 ${
                   isActive
-                    ? "bg-gradient-to-b from-indigo-400 to-indigo-600"
-                    : "bg-gradient-to-b from-stone-800 to-stone-950 hover:from-stone-700"
-                }`}
+                    ? "bg-gradient-to-b from-indigo-400 via-indigo-500 to-indigo-600"
+                    : "bg-gradient-to-b from-stone-700 via-stone-800 to-stone-900 hover:from-stone-600"
+                }
+              `}
             >
-              <span className="text-[10px] text-stone-300 font-medium uppercase">
+              {/* Key letter indicator */}
+              <span
+                className={`
+                text-[8px] md:text-[10px] font-semibold uppercase
+                ${isActive ? "text-white drop-shadow-sm" : "text-stone-400"}
+              `}
+              >
                 {key.keyboardKey}
               </span>
             </button>
           );
         })}
       </div>
+
+      {/* Reflection effect at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
     </div>
   );
 }
